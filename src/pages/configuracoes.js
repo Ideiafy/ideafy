@@ -16,24 +16,16 @@ export default function MinhaContaPage() {
     email: "lucas@exemplo.com",
     username: "lucasalves",
     bio: "Designer e desenvolvedor apaixonado por criar experiências incríveis.",
-    location: "São Paulo, Brasil",
     joinDate: "Janeiro 2024",
     avatar: Images.PhotoCard
   });
 
-  const [notifications, setNotifications] = useState({
-    email: true,
-    push: true,
-    marketing: false,
-    updates: true
-  });
 
   const [formData, setFormData] = useState({
     name: userProfile.name,
     email: userProfile.email,
     username: userProfile.username,
     bio: userProfile.bio,
-    location: userProfile.location,
     currentPassword: "",
     newPassword: "",
     confirmPassword: ""
@@ -51,28 +43,30 @@ export default function MinhaContaPage() {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleNotificationChange = (field) => {
-    setNotifications(prev => ({ ...prev, [field]: !prev[field] }));
-  };
-
   const handleAvatarChange = (event) => {
     const file = event.target.files[0];
     if (file) {
       console.log("Uploading avatar:", file);
     }
   };
+  const handleLogout = () => {
+  if (window.confirm("Tem certeza que deseja sair da sua conta?")) {
+    // Aqui você implementa a lógica de logout
+    console.log("Logout realizado");
+    // Exemplo: limpar localStorage, redirecionar, etc.
+  }
+};
 
-  const handleSaveProfile = () => {
-    setUserProfile(prev => ({
-      ...prev,
-      name: formData.name,
-      email: formData.email,
-      username: formData.username,
-      bio: formData.bio,
-      location: formData.location
-    }));
-    console.log("Profile saved:", formData);
-  };
+const handleSaveProfile = () => {
+  setUserProfile(prev => ({
+    ...prev,
+    name: formData.name,
+    username: formData.username,
+    bio: formData.bio
+    // Remover: location: formData.location
+  }));
+  console.log("Profile saved:", formData);
+};
 
   const handleChangePassword = () => {
     if (formData.newPassword !== formData.confirmPassword) {
@@ -96,12 +90,6 @@ export default function MinhaContaPage() {
     </svg>
   );
 
-  const BellIcon = () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-      <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-    </svg>
-  );
 
   const SettingsIcon = () => (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -126,13 +114,13 @@ export default function MinhaContaPage() {
     </svg>
   );
 
-  const MapPinIcon = () => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-      <circle cx="12" cy="10" r="3"/>
+  const LogOutIcon = () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+      <polyline points="16,17 21,12 16,7"/>
+      <line x1="21" y1="12" x2="9" y2="12"/>
     </svg>
   );
-
   const renderTabContent = () => {
     switch (activeTab) {
       case "pessoais":
@@ -171,16 +159,6 @@ export default function MinhaContaPage() {
                 </div>
               </div>
               
-              <div className="modern-input-group">
-                <label className="modern-label">Email</label>
-                <input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => handleInputChange("email", e.target.value)}
-                  className="modern-input"
-                  placeholder="seu@email.com"
-                />
-              </div>
               
               <div className="modern-input-group">
                 <label className="modern-label">Bio</label>
@@ -193,16 +171,6 @@ export default function MinhaContaPage() {
                 />
               </div>
               
-              <div className="modern-input-group">
-                <label className="modern-label">Localização</label>
-                <input
-                  type="text"
-                  value={formData.location}
-                  onChange={(e) => handleInputChange("location", e.target.value)}
-                  className="modern-input"
-                  placeholder="Cidade, Estado"
-                />
-              </div>
               
               <button onClick={handleSaveProfile} className="modern-save-btn">
                 Salvar Alterações
@@ -262,80 +230,6 @@ export default function MinhaContaPage() {
           </div>
         );
 
-      case "notificacoes":
-        return (
-          <div className="tab-content">
-            <div className="content-header">
-              <h2 className="content-title">Notificações</h2>
-              <p className="content-description">Gerencie como você recebe notificações</p>
-            </div>
-            
-            <div className="modern-form-card">
-              <div className="notification-list">
-                <div className="modern-notification-item">
-                  <div className="notification-content">
-                    <h4 className="notification-title">Email</h4>
-                    <p className="notification-desc">Receba atualizações importantes por email</p>
-                  </div>
-                  <label className="modern-toggle">
-                    <input
-                      type="checkbox"
-                      checked={notifications.email}
-                      onChange={() => handleNotificationChange("email")}
-                    />
-                    <span className="modern-toggle-slider"></span>
-                  </label>
-                </div>
-                
-                <div className="modern-notification-item">
-                  <div className="notification-content">
-                    <h4 className="notification-title">Push</h4>
-                    <p className="notification-desc">Notificações em tempo real no navegador</p>
-                  </div>
-                  <label className="modern-toggle">
-                    <input
-                      type="checkbox"
-                      checked={notifications.push}
-                      onChange={() => handleNotificationChange("push")}
-                    />
-                    <span className="modern-toggle-slider"></span>
-                  </label>
-                </div>
-                
-                <div className="modern-notification-item">
-                  <div className="notification-content">
-                    <h4 className="notification-title">Marketing</h4>
-                    <p className="notification-desc">Ofertas especiais e novidades</p>
-                  </div>
-                  <label className="modern-toggle">
-                    <input
-                      type="checkbox"
-                      checked={notifications.marketing}
-                      onChange={() => handleNotificationChange("marketing")}
-                    />
-                    <span className="modern-toggle-slider"></span>
-                  </label>
-                </div>
-                
-                <div className="modern-notification-item">
-                  <div className="notification-content">
-                    <h4 className="notification-title">Atualizações</h4>
-                    <p className="notification-desc">Novos recursos e melhorias</p>
-                  </div>
-                  <label className="modern-toggle">
-                    <input
-                      type="checkbox"
-                      checked={notifications.updates}
-                      onChange={() => handleNotificationChange("updates")}
-                    />
-                    <span className="modern-toggle-slider"></span>
-                  </label>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-
       case "conta":
         return (
           <div className="tab-content">
@@ -361,6 +255,17 @@ export default function MinhaContaPage() {
                   </div>
                   <button className="modern-action-btn secondary">Desativar</button>
                 </div>
+
+                                <div className="modern-action-item">
+  <div className="action-content">
+    <h4 className="action-title">Sair da Conta</h4>
+    <p className="action-desc">Desconecte-se da sua conta atual</p>
+  </div>
+  <button onClick={handleLogout} className="modern-action-btn logout">
+    <LogOutIcon />
+    Sair
+  </button>
+</div>
                 
                 <div className="modern-action-item danger">
                   <div className="action-content">
@@ -369,6 +274,8 @@ export default function MinhaContaPage() {
                   </div>
                   <button className="modern-action-btn danger">Excluir</button>
                 </div>
+
+
               </div>
             </div>
           </div>
@@ -379,12 +286,12 @@ export default function MinhaContaPage() {
     }
   };
 
-  const tabs = [
-    { id: "pessoais", label: "Perfil", icon: <UserIcon /> },
-    { id: "seguranca", label: "Segurança", icon: <ShieldIcon /> },
-    { id: "notificacoes", label: "Notificações", icon: <BellIcon /> },
-    { id: "conta", label: "Conta", icon: <SettingsIcon /> }
-  ];
+const tabs = [
+  { id: "pessoais", label: "Perfil", icon: <UserIcon /> },
+  { id: "seguranca", label: "Segurança", icon: <ShieldIcon /> },
+  { id: "conta", label: "Conta", icon: <SettingsIcon /> }
+];
+
 
   return (
     <div className={`minha-conta-container ${tema === "escuro" ? "escuro-fundo-cinza" : "claro-fundo-bege"}`}>
@@ -429,10 +336,6 @@ export default function MinhaContaPage() {
                 <p className="modern-profile-bio">{userProfile.bio}</p>
                 
                 <div className="profile-stats">
-                  <div className="stat-item">
-                    <MapPinIcon />
-                    <span>{userProfile.location}</span>
-                  </div>
                   <div className="stat-item">
                     <CalendarIcon />
                     <span>Entrou em {userProfile.joinDate}</span>

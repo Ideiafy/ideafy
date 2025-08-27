@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Images from "../assets/images";
 import "../styles/login.css";
-import login from '../services/auth/auth'
+// import login from '../services/auth/auth'
 
 
 export default function Login() {
@@ -20,15 +20,16 @@ export default function Login() {
 
  // consumo api
   async function handleSubmit (e) {
-    e.preventDefault();
-    // Lógica de login aqui
-   console.log("Login attempt:", { email, password });
-    const token = await login(email,password);
-    if(token)
-    {
-      localStorage.setItem("token", token);
-      navigate('/feed');
-    }
+  //   e.preventDefault();
+  //   // Lógica de login aqui
+  //  console.log("Login attempt:", { email, password });
+  //   const token = await login(email,password);
+  //   if(token)
+  //   {
+  //     localStorage.setItem("token", token);
+  //     navigate('/feed');
+  //   }
+    navigate('/feed');
    
   };
 

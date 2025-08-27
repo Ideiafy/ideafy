@@ -3,32 +3,27 @@ import Images from "../assets/images";
 import "../styles/feed.css";
 import Sidebar from "./componentes/sidebar";
 import MobileHeader from "./componentes/mobileHeader";
+import Card from "./componentes/card";
 import { useNavigate } from "react-router-dom";
 
-export default function Feed() {
+export default function Feed({ userId = 1 }) {
   const [tema, setTema] = useState("escuro");
   const [postText, setPostText] = useState("");
   const [selectedFiles, setSelectedFiles] = useState([]);
-  const [lightboxImage, setLightboxImage] = useState(null);
   const textareaRef = useRef(null);
   const [activeNavItem, setActiveNavItem] = useState("home");
-  const [commentModal, setCommentModal] = useState({ isOpen: false, postId: null });
-  const [comments, setComments] = useState({});
-  const [newComment, setNewComment] = useState('');
-  const [followedUsers, setFollowedUsers] = useState(new Set());
-  const [likedPosts, setLikedPosts] = useState(new Set());
   const navigate = useNavigate();
+  // useEffect(() => {
 
-  useEffect(() => {
-   
-    
-    const token = localStorage.getItem("token"); 
-    console.log(token)
-    if (!token) {
-      navigate("/login"); 
-    }
-   
-  }, []); 
+  //   const token = localStorage.getItem("token");
+  //   console.log(token)
+  //   if (!token) {
+  //     navigate("/login");
+  //   }
+
+  // }, []);
+
+
 
   const toggleTema = () => {
     setTema((prev) => (prev === "escuro" ? "claro" : "escuro"));
@@ -39,112 +34,85 @@ export default function Feed() {
     // Adicione sua lógica de navegação aqui
   };
 
-  // Funções para toggle follow e like
-  const toggleFollow = (userId) => {
-    setFollowedUsers(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(userId)) {
-        newSet.delete(userId);
-      } else {
-        newSet.add(userId);
-      }
-      return newSet;
-    });
-  };
-
-  const toggleLike = (postId) => {
-    setLikedPosts(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(postId)) {
-        newSet.delete(postId);
-      } else {
-        newSet.add(postId);
-      }
-      return newSet;
-    });
-  };
 
   // Auto-resize textarea
   useEffect(() => {
     if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px';
+      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height =
+        textareaRef.current.scrollHeight + "px";
     }
   }, [postText]);
 
-  // Handle file selection
-  const handleFileSelect = (type) => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.multiple = true;
-    input.accept = type === 'video' ? 'video/*' : 'image/*';
-    
-    input.onchange = (e) => {
-      const files = Array.from(e.target.files);
-      const newFiles = files.map(file => ({
-        file,
-        type: file.type.startsWith('video/') ? 'video' : 'image',
-        url: URL.createObjectURL(file),
-        id: Date.now() + Math.random()
-      }));
-      setSelectedFiles(prev => [...prev, ...newFiles]);
-    };
-    
-    input.click();
-  };
 
-  // Remove file preview
-  const removeFile = (id) => {
-    setSelectedFiles(prev => {
-      const fileToRemove = prev.find(f => f.id === id);
-      if (fileToRemove) {
-        URL.revokeObjectURL(fileToRemove.url);
-      }
-      return prev.filter(f => f.id !== id);
-    });
+  // Mock data do usuário
+  const userData = {
+    id: userId,
+    name: "Lucas Alves",
+    username: "@lucasalves",
+    bio: "Desenvolvedor Full Stack apaixonado por tecnologia e inovação. Criando soluções que fazem a diferença no mundo digital.",
+    avatar: Images.PhotoCard || "/default-avatar.jpg",
+    coverImage: Images.Banner3 || "/default-cover.jpg",
+    joinDate: "Março 2022",
+    isOnline: true,
+    verified: true,
+    stats: {
+      posts: 124,
+      followers: 2847,
+      following: 892
+    }
   };
+const userPosts = [
+    {
+      id: 1,
+      author: userData,
+      content: "Acabei de finalizar um projeto incrível usando React e Node.js! A sensação de ver tudo funcionando perfeitamente é indescritível. 🚀",
+      media: [
+        {
+          type: "image",
+          url: Images.DeskCard || "/default-post.jpg",
+          alt: "Projeto finalizado"
+        }
+      ],
+      likes: 45,
+      comments: 12,
+      time: "2h",
+      isLiked: false
+    },
+    {
+      id: 2,
+      author: userData,
+      content: "Compartilhando algumas dicas de UI/UX que aprendi esta semana. O design é muito mais do que apenas fazer algo bonito - é sobre criar experiências memoráveis!",
+      media: [
+        {
+          type: "image",
+          url: Images.Banner2,
+          alt: "UI/UX Design"
+        },
+        {
+          type: "image",
+          url: Images.Banner1,
+          alt: "Design Process"
+        }
+      ],
+      likes: 78,
+      comments: 23,
+      time: "1d",
+      isLiked: true
+    },
+    {
+      id: 3,
+      author: userData,
+      content: "Hoje foi dia de contribuir com open source! Nada melhor do que retribuir para a comunidade que tanto me ensinou.",
+      media: [],
+      likes: 32,
+      comments: 8,
+      time: "3d",
+      isLiked: false
+    }
+  ];
 
-  // Clear post
-  const clearPost = () => {
-    setPostText("");
-    selectedFiles.forEach(file => URL.revokeObjectURL(file.url));
-    setSelectedFiles([]);
-  };
-
-  // Abrir modal de comentários
-  const openCommentModal = (postId) => {
-    setCommentModal({ isOpen: true, postId });
-    setNewComment('');
-  };
-
-  // Fechar modal de comentários
-  const closeCommentModal = () => {
-    setCommentModal({ isOpen: false, postId: null });
-    setNewComment('');
-  };
-
-  // Adicionar comentário
-  const addComment = () => {
-    if (!newComment.trim()) return;
-    
-    const postId = commentModal.postId;
-    const comment = {
-      id: Date.now(),
-      text: newComment.trim(),
-      author: 'Lucas Alves',
-      avatar: Images.PhotoCard || "/default-avatar.jpg",
-      time: 'agora'
-    };
-    
-    setComments(prev => ({
-      ...prev,
-      [postId]: [...(prev[postId] || []), comment]
-    }));
-    
-    setNewComment('');
-  };
-
-  // Dados mock para os posts
+  // Dados mock para os posts do feed geral
   const posts = [
     {
       id: 1,
@@ -152,25 +120,26 @@ export default function Feed() {
         name: "Lucas Alves",
         avatar: Images.PhotoCard || "/default-avatar.jpg",
         time: "1h",
-        isOnline: true
+        isOnline: true,
       },
-      content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+      content:
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
       media: [
         {
           type: "image",
           url: Images.DeskCard || "/default-post.jpg",
-          alt: "Post image 1"
+          alt: "Post image 1",
         },
         {
-          type: "image", 
+          type: "image",
           url: Images.Banner3,
-          alt: "Post image 2"
-        }
+          alt: "Post image 2",
+        },
       ],
       status: "Vendido",
       likes: 12,
       comments: 3,
-      isLiked: false
+      isLiked: false,
     },
     {
       id: 2,
@@ -178,542 +147,231 @@ export default function Feed() {
         name: "Samanta Neves",
         avatar: Images.Banner1,
         time: "15m",
-        isOnline: false
+        isOnline: false,
       },
-      content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+      content:
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
       media: [
         {
           type: "image",
           url: Images.Banner2,
-          alt: "Claude post image"
-        }
+          alt: "Claude post image",
+        },
       ],
       status: "Em Desenvolvimento",
       likes: 8,
       comments: 5,
-      isLiked: true
-    }
+      isLiked: true,
+    },
   ];
 
   const HeartIcon = () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
+      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
     </svg>
   );
 
   const VideoIcon = () => (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M17 10.5V7a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-3.5l4 4v-11l-4 4z"/>
+      <path d="M17 10.5V7a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-3.5l4 4v-11l-4 4z" />
     </svg>
   );
 
   const PhotoIcon = () => (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-      <circle cx="9" cy="9" r="2"/>
-      <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+      <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+      <circle cx="9" cy="9" r="2" />
+      <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
     </svg>
   );
 
   const CommentIcon = () => (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
     </svg>
   );
 
   const CloseIcon = () => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <line x1="18" y1="6" x2="6" y2="18"/>
-      <line x1="6" y1="6" x2="18" y2="18"/>
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
     </svg>
   );
 
   const ChevronLeftIcon = () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <polyline points="15,18 9,12 15,6"/>
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
+      <polyline points="15,18 9,12 15,6" />
     </svg>
   );
 
   const ChevronRightIcon = () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <polyline points="9,18 15,12 9,6"/>
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
+      <polyline points="9,18 15,12 9,6" />
     </svg>
   );
 
-  // Componente para navegação de mídia com suporte ao swipe
-  const MediaGallery = ({ media, postId }) => {
-    const [currentIndex, setCurrentIndex] = useState(0);
-    const [touchStart, setTouchStart] = useState(null);
-    const [touchEnd, setTouchEnd] = useState(null);
-    
-    const nextMedia = () => {
-      setCurrentIndex((prev) => (prev + 1) % media.length);
-    };
-    
-    const prevMedia = () => {
-      setCurrentIndex((prev) => (prev - 1 + media.length) % media.length);
-    };
-    
-    // Funções para controle do swipe
-    const minSwipeDistance = 50;
-    
-    const handleTouchStart = (e) => {
-      setTouchEnd(null);
-      setTouchStart(e.targetTouches[0].clientX);
-    };
-    
-    const handleTouchMove = (e) => {
-      setTouchEnd(e.targetTouches[0].clientX);
-    };
-    
-    const handleTouchEnd = () => {
-      if (!touchStart || !touchEnd) return;
-      
-      const distance = touchStart - touchEnd;
-      const isLeftSwipe = distance > minSwipeDistance;
-      const isRightSwipe = distance < -minSwipeDistance;
-      
-      if (isLeftSwipe && media.length > 1) {
-        nextMedia();
-      }
-      if (isRightSwipe && media.length > 1) {
-        prevMedia();
-      }
-    };
-    
-    const currentMedia = media[currentIndex];
-    
-    return (
-      <div 
-        className="postImageContainer"
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-      >
-        <div className="mediaWrapper" onClick={() => setLightboxImage({media, currentIndex})}>
-          {currentMedia.type === 'image' ? (
-            <img 
-              src={currentMedia.url} 
-              alt={currentMedia.alt} 
-              className="postImage"
-              draggable={false}
-            />
-          ) : (
-            <video 
-              src={currentMedia.url} 
-              className="postVideo" 
-              controls 
-              onClick={(e) => e.stopPropagation()}
-              onTouchStart={(e) => e.stopPropagation()}
-              onTouchMove={(e) => e.stopPropagation()}
-              onTouchEnd={(e) => e.stopPropagation()}
-            />
-          )}
-        </div>
-        
-        {media.length > 1 && (
-          <>
-            <button className="mediaPrev" onClick={prevMedia}>
-              <ChevronLeftIcon />
-            </button>
-            <button className="mediaNext" onClick={nextMedia}>
-              <ChevronRightIcon />
-            </button>
-            <div className="mediaIndicators">
-              {media.map((_, index) => (
-                <div 
-                  key={index} 
-                  className={`mediaIndicator ${index === currentIndex ? 'active' : ''}`}
-                  onClick={() => setCurrentIndex(index)}
-                />
-              ))}
-            </div>
-          </>
-        )}
-      </div>
-    );
-  };
 
-  // Componente Lightbox 
-  const Lightbox = () => {
-    // Sempre chame os hooks antes de qualquer return condicional
-    const [currentIndex, setCurrentIndex] = useState(lightboxImage?.currentIndex || 0);
-    const [touchStart, setTouchStart] = useState(null);
-    const [touchEnd, setTouchEnd] = useState(null);
-    
-    // Agora você pode fazer o return condicional
-    if (!lightboxImage) return null;
-    
-    const { media } = lightboxImage;
-    
-    const nextMedia = () => {
-      setCurrentIndex((prev) => (prev + 1) % media.length);
-    };
-    
-    const prevMedia = () => {
-      setCurrentIndex((prev) => (prev - 1 + media.length) % media.length);
-    };
-    
-    // Funções para controle do swipe
-    const minSwipeDistance = 50;
-    
-    const handleTouchStart = (e) => {
-      setTouchEnd(null); // reset touchEnd
-      setTouchStart(e.targetTouches[0].clientX);
-    };
-    
-    const handleTouchMove = (e) => {
-      setTouchEnd(e.targetTouches[0].clientX);
-    };
-    
-    const handleTouchEnd = () => {
-      if (!touchStart || !touchEnd) return;
-      
-      const distance = touchStart - touchEnd;
-      const isLeftSwipe = distance > minSwipeDistance;
-      const isRightSwipe = distance < -minSwipeDistance;
-      
-      if (isLeftSwipe && media.length > 1) {
-        nextMedia();
-      }
-      if (isRightSwipe && media.length > 1) {
-        prevMedia();
-      }
-    };
-    
-    const currentMedia = media[currentIndex];
-    
-    return (
-      <div className="lightbox" onClick={() => setLightboxImage(null)}>
-        <div 
-          className="lightboxContent" 
-          onClick={(e) => e.stopPropagation()}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-        >
-          <button className="lightboxClose" onClick={() => setLightboxImage(null)}>
-            <CloseIcon />
-          </button>
-          
-          {currentMedia.type === 'image' ? (
-            <img 
-              src={currentMedia.url} 
-              alt={currentMedia.alt} 
-              className="lightboxImage"
-              draggable={false}
-            />
-          ) : (
-            <video 
-              src={currentMedia.url} 
-              className="lightboxVideo" 
-              controls 
-              onTouchStart={(e) => e.stopPropagation()}
-              onTouchMove={(e) => e.stopPropagation()}
-              onTouchEnd={(e) => e.stopPropagation()}
-            />
-          )}
-          
-          {media.length > 1 && (
-            <>
-              <button className="lightboxPrev" onClick={prevMedia}>
-                <ChevronLeftIcon />
-              </button>
-              <button className="lightboxNext" onClick={nextMedia}>
-                <ChevronRightIcon />
-              </button>
-              <div className="lightboxIndicators">
-                {media.map((_, index) => (
-                  <div 
-                    key={index} 
-                    className={`lightboxIndicator ${index === currentIndex ? 'active' : ''}`}
-                    onClick={() => setCurrentIndex(index)}
-                  />
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-    );
-  };
 
-  // Componente Modal de Comentários
-  const CommentModal = () => {
-    if (!commentModal.isOpen) return null;
-    
-    const currentPost = posts.find(p => p.id === commentModal.postId);
-    const postComments = comments[commentModal.postId] || [];
-    
-    return (
-      <div className="commentModal" onClick={closeCommentModal}>
-        <div className="commentModalContent" onClick={(e) => e.stopPropagation()}>
-          <div className="commentModalHeader">
-            <h3>Comentários</h3>
-            <button className="commentModalClose" onClick={closeCommentModal}>
-              <CloseIcon />
-            </button>
-          </div>
-          
-          <div className="commentModalBody">
-            <div className="originalPost">
-              <div className="postHeader">
-                <div className="postUserAvatar">
-                  <img src={currentPost?.author.avatar} alt={currentPost?.author.name} />
-                  {currentPost?.author.isOnline && <div className="onlineStatus"></div>}
-                </div>
-                <div className="postUserInfo">
-                  <h4 className="postUserName">{currentPost?.author.name}</h4>
-                  <span className="postTime">{currentPost?.author.time}</span>
-                </div>
-                <button 
-                  className={`followBtn ${followedUsers.has(currentPost?.id) ? 'following' : ''}`}
-                  onClick={() => toggleFollow(currentPost?.id)}
-                >
-                  {followedUsers.has(currentPost?.id) ? 'Seguindo' : 'Seguir'}
-                </button>
-              </div>
-              <p className="postText">{currentPost?.content}</p>
-            </div>
-            
-            <div className="commentsList">
-              {postComments.length === 0 ? (
-                <div className="noComments">
-                  <p>Seja o primeiro a comentar!</p>
-                </div>
-              ) : (
-                postComments.map((comment) => (
-                  <div key={comment.id} className="commentItem">
-                    <div className="commentAvatar">
-                      <img src={comment.avatar} alt={comment.author} />
-                    </div>
-                    <div className="commentContent">
-                      <div className="commentHeader">
-                        <h5 className="commentAuthor">{comment.author}</h5>
-                        <span className="commentTime">{comment.time}</span>
-                      </div>
-                      <p className="commentText">{comment.text}</p>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-            
-            <div className="addComment">
-              <div className="userAvatar">
-                <img src={Images.PhotoCard || "/default-avatar.jpg"} alt="Seu avatar" />
-              </div>
-              <div className="commentInputContainer">
-                <textarea
-                  value={newComment}
-                  onChange={(e) => setNewComment(e.target.value)}
-                  placeholder="Escreva um comentário..."
-                  className="commentInput"
-                  rows="1"
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      addComment();
-                    }
-                  }}
-                />
-                <button 
-                  className="sendComment" 
-                  onClick={addComment}
-                  disabled={!newComment.trim()}
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
-                  </svg>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
 
   return (
-    <div id="Feed" className={tema === "escuro" ? "escuro-fundo-cinza" : "claro-fundo-bege"}>
+    <div
+      id="Feed"
+      className={tema === "escuro" ? "escuro-fundo-cinza" : "claro-fundo-bege"}
+    >
       {/* Header Mobile */}
       <MobileHeader tema={tema} toggleTema={toggleTema} title="Ideafy" />
 
       {/* Sidebar */}
-      <Sidebar 
+      <Sidebar
         tema={tema}
         toggleTema={toggleTema}
         activeItem={activeNavItem}
         onNavigate={handleNavigation}
       />
 
-      {/* Sidebar Content - Para preencher o espaço vazio */}
-      <div className="sidebarContent">
-        <div className="sidebarContentInner">
-          <h3>Trending Topics</h3>
-          <div className="trendingItem">
-            <span className="trendingTag">#ReactJS</span>
-            <span className="trendingCount">1.2k posts</span>
-          </div>
-          <div className="trendingItem">
-            <span className="trendingTag">#Design</span>
-            <span className="trendingCount">856 posts</span>
-          </div>
-          <div className="trendingItem">
-            <span className="trendingTag">#Innovation</span>
-            <span className="trendingCount">432 posts</span>
-          </div>
-        </div>
+      <div className="create-post-container">
+  <div className="create-post-card">
+    {/* Header do post */}
+    <div className="create-post-header">
+      <img 
+        src={userData.avatar} 
+        alt={userData.name}
+        className="user-avatar"
+      />
+      <div className="user-info">
+        <span className="user-name">{userData.name}</span>
+        <span className="visibility-text">Público</span>
       </div>
+    </div>
+
+    {/* Área de texto */}
+    <div className="create-post-content">
+      <textarea
+        ref={textareaRef}
+        value={postText}
+        onChange={(e) => setPostText(e.target.value)}
+        placeholder="No que você está pensando?"
+        className="post-textarea"
+        rows="1"
+      />
+    </div>
+
+    {/* Preview de arquivos selecionados */}
+    {selectedFiles.length > 0 && (
+      <div className="media-preview">
+        {selectedFiles.map((file, index) => (
+          <div key={index} className="media-preview-item">
+            <img 
+              src={URL.createObjectURL(file)} 
+              alt={`Preview ${index + 1}`}
+              className="preview-image"
+            />
+            <button
+              onClick={() => {
+                const newFiles = selectedFiles.filter((_, i) => i !== index);
+                setSelectedFiles(newFiles);
+              }}
+              className="remove-media-btn"
+            >
+              <CloseIcon />
+            </button>
+          </div>
+        ))}
+      </div>
+    )}
+
+    {/* Barra de ações */}
+    <div className="create-post-actions">
+      <div className="media-options">
+        <label className="media-option">
+          <input
+            type="file"
+            multiple
+            accept="image/*"
+            onChange={(e) => {
+              const files = Array.from(e.target.files);
+              setSelectedFiles(prev => [...prev, ...files]);
+            }}
+            style={{ display: 'none' }}
+          />
+          <PhotoIcon />
+          <span>Foto</span>
+        </label>
+
+        <label className="media-option">
+          <input
+            type="file"
+            multiple
+            accept="video/*"
+            onChange={(e) => {
+              const files = Array.from(e.target.files);
+              setSelectedFiles(prev => [...prev, ...files]);
+            }}
+            style={{ display: 'none' }}
+          />
+          <VideoIcon />
+          <span>Vídeo</span>
+        </label>
+      </div>
+
+      <button 
+        className={`post-button ${postText.trim() || selectedFiles.length > 0 ? 'active' : 'disabled'}`}
+        disabled={!postText.trim() && selectedFiles.length === 0}
+        onClick={() => {
+          // Adicione aqui a lógica para enviar o post
+          console.log('Post enviado:', { text: postText, files: selectedFiles });
+          setPostText('');
+          setSelectedFiles([]);
+        }}
+      >
+        Publicar
+      </button>
+    </div>
+  </div>
+</div>
 
       {/* Conteúdo Principal */}
       <main className="mainContent">
-        {/* Área de criar post */}
-        <div className="createPost">
-          <div className="createPostHeader">
-            <div className="userAvatar">
-              <img src={Images.PhotoCard || "/default-avatar.jpg"} alt="Seu avatar" />
-              <div className="onlineStatus"></div>
-            </div>
-            <div className="userInfo">
-              <h3 className="userName">Lucas Alves</h3>
-              <button className="postButton">Post</button>
-            </div>
-          </div>
-
-          <div className="createPostContent">
-            <textarea
-              ref={textareaRef}
-              value={postText}
-              onChange={(e) => setPostText(e.target.value)}
-              placeholder="Compartilhe sua ideia..."
-              className="postTextarea"
-              rows="1"
-            />
-            
-            {/* Preview dos arquivos selecionados */}
-            {selectedFiles.length > 0 && (
-              <div className="mediaPreview">
-                {selectedFiles.map((file) => (
-                  <div key={file.id} className="previewItem">
-                    {file.type === 'image' ? (
-                      <img src={file.url} alt="Preview" className="previewImage" />
-                    ) : (
-                      <video src={file.url} className="previewVideo" controls />
-                    )}
-                    <button 
-                      className="removePreview" 
-                      onClick={() => removeFile(file.id)}
-                      title="Remover arquivo"
-                    >
-                      <CloseIcon />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-            
-            <div className="postActions">
-              <button 
-                className="mediaButton video"
-                onClick={() => handleFileSelect('video')}
-              >
-                <VideoIcon />
-                Vídeo
-              </button>
-              <button 
-                className="mediaButton photo"
-                onClick={() => handleFileSelect('photo')}
-              >
-                <PhotoIcon />
-                Foto
-              </button>
-              {(postText || selectedFiles.length > 0) && (
-                <button className="clearButton" onClick={clearPost}>
-                  Limpar
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-
+        
         {/* Feed de posts */}
-        <div className="feedContent">
-          {posts.map((post) => (
-            <article key={post.id} className="postCard">
-              <div className="postHeader">
-                <div className="postUserAvatar">
-                  <img src={post.author.avatar} alt={post.author.name} />
-                  {post.author.isOnline && <div className="onlineStatus"></div>}
-                </div>
-                <div className="postUserInfo">
-                  <h4 className="postUserName">{post.author.name}</h4>
-                  <span className="postTime">{post.author.time}</span>
-                </div>
-                <button 
-                  className={`followBtn ${followedUsers.has(post.id) ? 'following' : ''}`}
-                  onClick={() => toggleFollow(post.id)}
-                >
-                  {followedUsers.has(post.id) ? 'Seguindo' : 'Seguir'}
-                </button>
-              </div>
-
-              <p className="postText">{post.content}</p>
-
-              <MediaGallery media={post.media} postId={post.id} />
-
-              <div className="postActions">
-                <button 
-                  className={`actionBtn like ${likedPosts.has(post.id) ? 'liked' : ''}`}
-                  onClick={() => toggleLike(post.id)}
-                >
-                  <HeartIcon />
-                  <span className="actionCount">
-                    {post.likes + (likedPosts.has(post.id) ? 1 : 0)}
-                  </span>
-                </button>
-                <button 
-                  className="actionBtn comment" 
-                  onClick={() => openCommentModal(post.id)}
-                >
-                  <CommentIcon />
-                  <span className="actionCount">{(comments[post.id] || []).length || post.comments}</span>
-                </button>
-              </div>
-            </article>
-          ))}
-        </div>
+        <Card />
       </main>
 
-      {/* Right Sidebar - Para preencher o lado direito */}
-      <div className="rightSidebar">
-        <div className="rightSidebarContent">
-          <h3>Sugestões</h3>
-          <div className="suggestionItem">
-            <div className="suggestionAvatar">
-              <img src={Images.DeskCard} alt="Maria Silva" />
-            </div>
-            <div className="suggestionInfo">
-              <h4>Maria Silva</h4>
-              <span>Designer UX/UI</span>
-            </div>
-            <button className="followBtn">Seguir</button>
-          </div>
-          <div className="suggestionItem">
-            <div className="suggestionAvatar">
-              <img src={Images.MobiCard} alt="João Santos" />
-            </div>
-            <div className="suggestionInfo">
-              <h4>João Santos</h4>
-              <span>Desenvolvedor</span>
-            </div>
-            <button className="followBtn">Seguir</button>
-          </div>
-        </div>
-      </div>
-
-      <Lightbox />
-      <CommentModal />
     </div>
   );
 }
