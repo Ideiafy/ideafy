@@ -369,7 +369,7 @@ const userPosts = [
       <main className="mainContent">
         
         {/* Feed de posts */}
-        <Card />
+        <Card showFollowButton={true} />
       </main>
 
     </div>

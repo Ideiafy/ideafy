@@ -429,7 +429,6 @@
     border-radius: 20px;
     overflow: hidden;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    animation: userProfile-modalSlideIn 0.3s ease-out;
     display: flex;
     flex-direction: column;
 }
@@ -439,16 +438,6 @@
     border: 1px solid rgba(107, 123, 196, 0.2);
 }
 
-@keyframes userProfile-modalSlideIn {
-    from {
-        opacity: 0;
-        transform: translateY(-50px) scale(0.9);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
 
 .userProfile-commentModalHeader {
     display: flex;
@@ -871,4 +860,208 @@
         width: 50px;
         height: 50px;
     }
+}
+.userProfile-commentInput:focus {
+  outline: none !important;
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 3px rgba(107, 123, 196, 0.1) !important;
+}
+.userProfile-commentInput { user-select: text; -webkit-user-select: text; }
+
+/* Adicione/substitua essas regras no seu card.css */
+
+/* Layout para acomodar o botão ao lado do nome */
+.userProfile-postUserDetails {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+/* Botão base - moderno e compacto */
+.userProfile-followBtn {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.3rem 0.8rem;
+    border: 1.5px solid var(--primary-color);
+    background: transparent;
+    color: var(--primary-color);
+    border-radius: 16px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    min-width: 70px;
+    height: 28px;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.userProfile-followBtn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.userProfile-followBtn:hover::before {
+    left: 100%;
+}
+
+.userProfile-followBtn:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: 0 4px 12px rgba(107, 123, 196, 0.25);
+    border-color: var(--primary-color);
+}
+
+.userProfile-followBtn:active {
+    transform: translateY(0) scale(0.98);
+    transition: all 0.1s;
+}
+
+/* Estado "Seguindo" */
+.userProfile-followBtn.following {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.userProfile-followBtn.following:hover {
+    background: #ef4444;
+    border-color: #ef4444;
+    color: white;
+}
+
+.userProfile-followBtn.following:hover span {
+    opacity: 0;
+    transform: scale(0.8);
+}
+
+.userProfile-followBtn.following:hover::after {
+    content: "Deixar";
+    position: absolute;
+    opacity: 1;
+    transform: scale(1);
+    transition: all 0.2s ease;
+}
+
+/* Variantes do botão */
+.userProfile-followBtn-inline {
+    /* Estilo padrão */
+}
+
+.userProfile-followBtn-modal {
+    /* Mesmo estilo, mas pode ter ajustes específicos se necessário */
+}
+
+/* Tema escuro */
+.escuro-fundo-cinza .userProfile-followBtn {
+    border-color: rgba(107, 123, 196, 0.7);
+    color: rgba(107, 123, 196, 0.9);
+    background: rgba(107, 123, 196, 0.05);
+}
+
+.escuro-fundo-cinza .userProfile-followBtn:hover {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 12px rgba(107, 123, 196, 0.3);
+}
+
+.escuro-fundo-cinza .userProfile-followBtn.following {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+/* Responsividade */
+
+/* Tablets */
+@media (max-width: 1023px) and (min-width: 768px) {
+    .userProfile-followBtn {
+        padding: 0.25rem 0.7rem;
+        font-size: 0.7rem;
+        height: 26px;
+        min-width: 65px;
+    }
+}
+
+/* Smartphones grandes */
+@media (max-width: 767px) and (min-width: 480px) {
+    .userProfile-followBtn {
+        padding: 0.2rem 0.6rem;
+        font-size: 0.65rem;
+        height: 24px;
+        min-width: 60px;
+        gap: 0.3rem;
+    }
+    
+    .userProfile-postUserDetails {
+        gap: 0.6rem;
+    }
+}
+
+/* Smartphones pequenos */
+@media (max-width: 479px) {
+    .userProfile-followBtn {
+        padding: 0.15rem 0.5rem;
+        font-size: 0.6rem;
+        height: 22px;
+        min-width: 50px;
+        border-radius: 12px;
+        gap: 0.2rem;
+    }
+    
+    .userProfile-followBtn span {
+        display: none;
+    }
+    
+    .userProfile-followBtn.following:hover::after {
+        content: "";
+        display: none;
+    }
+    
+    .userProfile-postUserDetails {
+        gap: 0.5rem;
+    }
+    
+    /* Mostra apenas ícone em telas pequenas */
+    .userProfile-followBtn {
+        min-width: 22px;
+        width: 22px;
+        padding: 0;
+    }
+}
+
+/* Animação de entrada */
+@keyframes userProfile-followBtnSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-10px) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+.userProfile-followBtn {
+    animation: userProfile-followBtnSlideIn 0.3s ease-out;
+}
+
+/* Estados de foco para acessibilidade */
+.userProfile-followBtn:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(107, 123, 196, 0.3);
+}
+
+.userProfile-followBtn:focus:not(:focus-visible) {
+    box-shadow: none;
 }
