@@ -8,6 +8,7 @@ import Configuracoes from "./pages/configuracoes.js";
 import Conta from "./pages/conta.js";
 import Desenvolvimento from "./pages/desenvolvimento.js";
 import Card from "./pages/componentes/card.js";
+import UserConta from "./pages/contaUsers.js";
 
 export default function AppRoutes() {
 
@@ -25,6 +26,7 @@ export default function AppRoutes() {
                     <Route path="/mensagens" element={<Desenvolvimento />} />
                     <Route path="/configuracoes" element={<Configuracoes />} />
                     <Route path="/teste" element={<Card />} />
+                    <Route path="/userconta" element={<UserConta />} />
                     
                 </Routes>
             </div>

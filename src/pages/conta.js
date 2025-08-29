@@ -186,12 +186,6 @@ export default function UserProfile({ userId = 1 }) {
     </svg>
   );
 
-  const VerifiedIcon = () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="userProfile-verifiedIcon">
-      <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-    </svg>
-  );
-
 
 
   const CalendarIcon = () => (
@@ -232,7 +226,6 @@ export default function UserProfile({ userId = 1 }) {
       <div className="userProfile-nameSection">
         <h1 className="userProfile-name">
           {userData.name}
-          {userData.verified && <VerifiedIcon />}
         </h1>
         <span className="userProfile-username">{userData.username}</span>
       </div>

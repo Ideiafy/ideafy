@@ -48,6 +48,7 @@
     position: relative;
     width: 48px;
     height: 48px;
+    cursor: pointer;
 }
 
 .userProfile-postUserAvatar img {
@@ -952,14 +953,6 @@
     transition: all 0.2s ease;
 }
 
-/* Variantes do botão */
-.userProfile-followBtn-inline {
-    /* Estilo padrão */
-}
-
-.userProfile-followBtn-modal {
-    /* Mesmo estilo, mas pode ter ajustes específicos se necessário */
-}
 
 /* Tema escuro */
 .escuro-fundo-cinza .userProfile-followBtn {

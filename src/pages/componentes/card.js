@@ -1,8 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
 import Images from "../../assets/images";
 import "../../styles/card.css";
+import { useNavigate } from 'react-router-dom';
 
-export default function Card({ showFollowButton = false }) {
+
+
+export default function Card({ showFollowButton = false, additionalPosts = [] }) {
   const [activeTab, setActiveTab] = useState("posts");
   const [likedPosts, setLikedPosts] = useState(new Set());
   const [commentModal, setCommentModal] = useState({
@@ -14,6 +17,11 @@ export default function Card({ showFollowButton = false }) {
 
   const [lightboxImage, setLightboxImage] = useState(null);
   const [isFollowing, setIsFollowing] = useState(false);
+  const navigate = useNavigate();
+
+  const UserConta=() =>{
+    navigate('/UserConta');
+  }
 
   const toggleFollow = () => {
     setIsFollowing((prev) => !prev);
@@ -88,6 +96,8 @@ export default function Card({ showFollowButton = false }) {
       isLiked: false,
     },
   ];
+
+  const allPosts = [...additionalPosts, ...userPosts];
 
   // Ícones SVG
   const HeartIcon = () => (
@@ -200,10 +210,9 @@ export default function Card({ showFollowButton = false }) {
     });
   };
 
-  const openCommentModal = (postId) => {
-    setCommentModal({ isOpen: true, postId });
-    // limpamos o campo quando o modal realmente abrir (no useEffect)
-  };
+const openCommentModal = (postId) => {
+  setCommentModal({ isOpen: true, postId });
+};
 
   // Componente MediaGallery
   const MediaGallery = ({ media, postId }) => {
@@ -433,7 +442,7 @@ export default function Card({ showFollowButton = false }) {
 
     if (!commentModal.isOpen) return null;
 
-    const currentPost = userPosts.find((p) => p.id === commentModal.postId);
+    const currentPost = allPosts.find((p) => p.id === commentModal.postId);
     const postComments = comments[commentModal.postId] || [];
 
     const addComment = () => {
@@ -481,7 +490,7 @@ export default function Card({ showFollowButton = false }) {
           <div className="userProfile-commentModalBody">
             <div className="userProfile-originalPost">
               <div className="userProfile-postHeader">
-                <div className="userProfile-postUserAvatar">
+                <div className="userProfile-postUserAvatar" onClick={UserConta}>
                   <img
                     src={currentPost?.author.avatar}
                     alt={currentPost?.author.name}
@@ -595,10 +604,10 @@ export default function Card({ showFollowButton = false }) {
       <div className="userProfile-tabContent">
         {activeTab === "posts" && (
           <div className="userProfile-postsContent">
-            {userPosts.map((post) => (
-              <article key={post.id} className="userProfile-postCard">
+            {allPosts.map((post) => (
+  <article key={post.id} className="userProfile-postCard">
                 <div className="userProfile-postHeader">
-                  <div className="userProfile-postUserAvatar">
+                  <div className="userProfile-postUserAvatar" onClick={UserConta}>
                     <img src={post.author.avatar} alt={post.author.name} />
                     {post.author.isOnline && (
                       <div className="userProfile-onlineStatus"></div>

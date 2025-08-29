@@ -12,6 +12,7 @@ export default function Feed({ userId = 1 }) {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const textareaRef = useRef(null);
   const [activeNavItem, setActiveNavItem] = useState("home");
+  const [feedPosts, setFeedPosts] = useState([]);
   const navigate = useNavigate();
   // useEffect(() => {
 
@@ -246,7 +247,33 @@ const userPosts = [
   );
 
 
+// Modifique a função do botão "Publicar" para:
+const handlePublishPost = () => {
+  if (!postText.trim() && selectedFiles.length === 0) return;
 
+  // Criar o novo post
+  const newPost = {
+    id: Date.now(), // ID único baseado no timestamp
+    author: userData,
+    content: postText,
+    media: selectedFiles.map(file => ({
+      type: file.type.startsWith('image/') ? 'image' : 'video',
+      url: URL.createObjectURL(file),
+      alt: file.name
+    })),
+    likes: 0,
+    comments: 0,
+    time: 'agora',
+    isLiked: false
+  };
+
+  // Adicionar o post no início da lista (posts mais recentes primeiro)
+  setFeedPosts(prev => [newPost, ...prev]);
+
+  // Limpar o formulário
+  setPostText('');
+  setSelectedFiles([]);
+};
 
   return (
     <div
@@ -293,27 +320,36 @@ const userPosts = [
 
     {/* Preview de arquivos selecionados */}
     {selectedFiles.length > 0 && (
-      <div className="media-preview">
-        {selectedFiles.map((file, index) => (
-          <div key={index} className="media-preview-item">
-            <img 
-              src={URL.createObjectURL(file)} 
-              alt={`Preview ${index + 1}`}
-              className="preview-image"
-            />
-            <button
-              onClick={() => {
-                const newFiles = selectedFiles.filter((_, i) => i !== index);
-                setSelectedFiles(newFiles);
-              }}
-              className="remove-media-btn"
-            >
-              <CloseIcon />
-            </button>
-          </div>
-        ))}
+  <div className="media-preview">
+    {selectedFiles.map((file, index) => (
+      <div key={index} className="media-preview-item">
+        {file.type.startsWith('image/') ? (
+          <img 
+            src={URL.createObjectURL(file)} 
+            alt={`Preview ${index + 1}`}
+            className="preview-image"
+          />
+        ) : (
+          <video 
+            src={URL.createObjectURL(file)} 
+            className="preview-image"
+            controls
+            muted
+          />
+        )}
+        <button
+          onClick={() => {
+            const newFiles = selectedFiles.filter((_, i) => i !== index);
+            setSelectedFiles(newFiles);
+          }}
+          className="remove-media-btn"
+        >
+          <CloseIcon />
+        </button>
       </div>
-    )}
+    ))}
+  </div>
+)}
 
     {/* Barra de ações */}
     <div className="create-post-actions">
@@ -334,30 +370,35 @@ const userPosts = [
         </label>
 
         <label className="media-option">
-          <input
-            type="file"
-            multiple
-            accept="video/*"
-            onChange={(e) => {
-              const files = Array.from(e.target.files);
-              setSelectedFiles(prev => [...prev, ...files]);
-            }}
-            style={{ display: 'none' }}
-          />
-          <VideoIcon />
-          <span>Vídeo</span>
-        </label>
+  <input
+    type="file"
+    multiple
+    accept="video/mp4,video/webm,video/ogg,video/quicktime,video/x-msvideo"
+    onChange={(e) => {
+      const files = Array.from(e.target.files);
+      // Filtrar apenas formatos suportados
+      const supportedFiles = files.filter(file => 
+        file.type.startsWith('video/') && 
+        ['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime', 'video/x-msvideo'].includes(file.type)
+      );
+      
+      if (supportedFiles.length !== files.length) {
+        alert('Alguns arquivos não são suportados. Use MP4, WebM ou OGG.');
+      }
+      
+      setSelectedFiles(prev => [...prev, ...supportedFiles]);
+    }}
+    style={{ display: 'none' }}
+  />
+  <VideoIcon />
+  <span>Vídeo</span>
+</label>
       </div>
 
       <button 
         className={`post-button ${postText.trim() || selectedFiles.length > 0 ? 'active' : 'disabled'}`}
         disabled={!postText.trim() && selectedFiles.length === 0}
-        onClick={() => {
-          // Adicione aqui a lógica para enviar o post
-          console.log('Post enviado:', { text: postText, files: selectedFiles });
-          setPostText('');
-          setSelectedFiles([]);
-        }}
+        onClick={handlePublishPost}
       >
         Publicar
       </button>
@@ -369,7 +410,7 @@ const userPosts = [
       <main className="mainContent">
         
         {/* Feed de posts */}
-        <Card showFollowButton={true} />
+        <Card showFollowButton={true} additionalPosts={feedPosts}  />
       </main>
 
     </div>
