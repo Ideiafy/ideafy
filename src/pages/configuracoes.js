@@ -1,14 +1,20 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import Sidebar from "./componentes/sidebar";
 import Images from '../assets/images';
+import { useNavigate } from "react-router-dom";
 import "../styles/configuracoes.css";
 import MobileHeader from "./componentes/mobileHeader";
+import logged from "./../services/users/logged"
+import findToken from "./../services/auth/token"
+import logout from "./../services/auth/logout"
 
 export default function MinhaContaPage() {
   const [tema, setTema] = useState("escuro");
   const [activeNavItem, setActiveNavItem] = useState("minha-conta");
   const [activeTab, setActiveTab] = useState("pessoais");
   const [showSearchModal, setShowSearchModal] = useState(false);
+  const [user,setUser] = useState(null);
+  const navigate = useNavigate();
 
   // Estados do usuário
   const [userProfile, setUserProfile] = useState({
@@ -31,6 +37,24 @@ export default function MinhaContaPage() {
     confirmPassword: ""
   });
 
+    async function fetchUserData(token)
+    {
+      const response = await logged(token)
+      setUser(response.data)
+    }
+
+      useEffect(() => {
+        const token = findToken()
+
+        if(!token)
+        {
+          navigate('/login');
+        }
+        fetchUserData(token)
+      },[])
+
+
+
   const toggleTema = () => {
     setTema(prev => prev === "escuro" ? "claro" : "escuro");
   };
@@ -49,10 +73,20 @@ export default function MinhaContaPage() {
       console.log("Uploading avatar:", file);
     }
   };
-  const handleLogout = () => {
+  async function handleLogout () {
   if (window.confirm("Tem certeza que deseja sair da sua conta?")) {
     // Aqui você implementa a lógica de logout
-    console.log("Logout realizado");
+    const token = findToken();
+    const response = await logout(token);
+
+    if(response.status == 200)
+    {
+      console.log("Logout realizado");
+      localStorage.clear();
+      return navigate('/login');
+    }
+    
+    
     // Exemplo: limpar localStorage, redirecionar, etc.
   }
 };
@@ -140,7 +174,7 @@ const handleSaveProfile = () => {
                   <label className="modern-label">Nome Completo</label>
                   <input
                     type="text"
-                    value={formData.name}
+                    value={ user?.name || "Loading..."}
                     onChange={(e) => handleInputChange("name", e.target.value)}
                     className="modern-input"
                     placeholder="Digite seu nome completo"
@@ -151,7 +185,7 @@ const handleSaveProfile = () => {
                   <label className="modern-label">Nome de Usuário</label>
                   <input
                     type="text"
-                    value={formData.username}
+                    value={ user?.username || "Loading..."}
                     onChange={(e) => handleInputChange("username", e.target.value)}
                     className="modern-input"
                     placeholder="@seuusername"
@@ -331,9 +365,9 @@ const tabs = [
               </div>
               
               <div className="profile-details">
-                <h1 className="modern-profile-name">{userProfile.name}</h1>
-                <p className="modern-profile-username">@{userProfile.username}</p>
-                <p className="modern-profile-bio">{userProfile.bio}</p>
+                <h1 className="modern-profile-name">{ user?.name || "Loading..."}</h1>
+                <p className="modern-profile-username">@{ user?.username || "Loading..."}</p>
+                <p className="modern-profile-bio">{ user?.name || "Loading..."}</p>
                 
                 <div className="profile-stats">
                   <div className="stat-item">

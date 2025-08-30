@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Images from "../assets/images";
 import "../styles/register.css";
+import store from "./../services/users/store"
 
 export default function Register() {
   const [tema, setTema] = useState("escuro");
@@ -9,32 +10,41 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [username, setUsername] = useState("");
+  const [name, setName] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [currentStep, setCurrentStep] = useState(1);
-  const [totalSteps] = useState(4);
+  const [totalSteps] = useState(5);
   const navigate = useNavigate();
 
   const toggleIcon = () => {
     setTema((prev) => (prev === "escuro" ? "claro" : "escuro"));
   };
 
-const handleSubmit = (e) => {
+  async function  handleSubmit (e) {
     e.preventDefault();
     
     if (currentStep < totalSteps) {
         // Validações por step
-        if (currentStep === 1 && !username.trim()) {
+        if (currentStep === 1 && !name.trim()) {
+            alert('Por favor, digite seu  nome completo ');
+            return;
+        }
+
+         if (currentStep === 2 && !username.trim()) {
             alert('Por favor, digite um nome de usuário');
             return;
         }
-        if (currentStep === 2 && !email.trim()) {
+
+        if (currentStep === 3 && !email.trim()) {
             alert('Por favor, digite um email válido');
             return;
         }
-        if (currentStep === 3 && !password.trim()) {
+        if (currentStep === 4 && !password.trim()) {
             alert('Por favor, digite uma senha');
             return;
         }
+
+       
         
         setCurrentStep(currentStep + 1);
     } else {
@@ -45,9 +55,18 @@ const handleSubmit = (e) => {
         }
         
         // Lógica de registro aqui
-        console.log("Register attempt:", { email, username, password });
+
+        console.log("Register attempt:", { name,username,email, password });
+
+        const response = await store(name,username,email,password);
+        if(response.status == 200)
+        {
+          navigate('/login');
         }
-    };
+      }
+
+
+  };
 
   const handleSocialLogin = (provider) => {
     console.log(`Login with ${provider}`);
@@ -62,7 +81,8 @@ const handleSubmit = (e) => {
     if (currentStep > 1) {
         setCurrentStep(currentStep - 1);
     }
-};
+
+  };
 
   // Ícones SVG
   const SunIcon = () => (
@@ -213,8 +233,31 @@ const handleSubmit = (e) => {
         <span className="stepText">Etapa {currentStep} de {totalSteps}</span>
     </div>
 
-    {/* Step 1 - Username */}
+     {/* Step 1 - Full Name */}
     {currentStep === 1 && (
+        <div className="inputGroup">
+            <label htmlFor="username" className="inputLabel">Nome Completo</label>
+            <div className="inputWrapper">
+                <svg className="inputIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                </svg>
+                <input
+                    id="username"
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Digite seu nome Completo"
+                    className="loginInput"
+                    autoFocus
+                    required
+                />
+            </div>
+        </div>
+    )}
+
+    {/* Step 2 - Username */}
+    {currentStep === 2 && (
         <div className="inputGroup">
             <label htmlFor="username" className="inputLabel">Nome de usuário</label>
             <div className="inputWrapper">
@@ -236,8 +279,8 @@ const handleSubmit = (e) => {
         </div>
     )}
 
-    {/* Step 2 - Email */}
-    {currentStep === 2 && (
+    {/* Step 3 - Email */}
+    {currentStep === 3 && (
         <div className="inputGroup">
             <label htmlFor="email" className="inputLabel">Email</label>
             <div className="inputWrapper">
@@ -259,8 +302,8 @@ const handleSubmit = (e) => {
         </div>
     )}
 
-    {/* Step 3 - Password */}
-    {currentStep === 3 && (
+    {/* Step 4 - Password */}
+    {currentStep === 4 && (
         <div className="inputGroup">
             <label htmlFor="password" className="inputLabel">Senha</label>
             <div className="inputWrapper">
@@ -291,8 +334,8 @@ const handleSubmit = (e) => {
         </div>
     )}
 
-    {/* Step 4 - Confirm Password */}
-    {currentStep === 4 && (
+    {/* Step 5 - Confirm Password */}
+    {currentStep === 5 && (
         <div className="inputGroup">
             <label htmlFor="confirmPassword" className="inputLabel">Confirmar Senha</label>
             <div className="inputWrapper">

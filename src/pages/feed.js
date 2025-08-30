@@ -5,6 +5,8 @@ import Sidebar from "./componentes/sidebar";
 import MobileHeader from "./componentes/mobileHeader";
 import Card from "./componentes/card";
 import { useNavigate } from "react-router-dom";
+import logged from "./../services/users/logged"
+import findToken from "./../services/auth/token"
 
 export default function Feed({ userId = 1 }) {
   const [tema, setTema] = useState("escuro");
@@ -15,16 +17,28 @@ export default function Feed({ userId = 1 }) {
   const [feedPosts, setFeedPosts] = useState([]);
   const [showAlert, setShowAlert] = useState(false);
   const [showTextAlert, setShowTextAlert] = useState(false);
+  const [user,setUser] = useState(null)
   const navigate = useNavigate();
-  // useEffect(() => {
+   
 
-  //   const token = localStorage.getItem("token");
-  //   console.log(token)
-  //   if (!token) {
-  //     navigate("/login");
-  //   }
+    async function fetchUserData(token)
+    {
+      const response = await logged(token)
+      setUser(response.data)
+    }
+    useEffect(() => {
 
-  // }, []);
+      const token = findToken();
+      console.log(token)
+      if (!token) {
+        return navigate("/login");
+      } 
+        fetchUserData(token);
+      
+
+      //localStorage.clear();
+
+    }, []);
 
 
 
@@ -303,7 +317,7 @@ const handlePublishPost = () => {
         className="user-avatar"
       />
       <div className="user-info">
-        <span className="user-name">{userData.name}</span>
+        <span className="user-name">{ user?.name || "Loading..."}</span>
         <span className="visibility-text">Público</span>
       </div>
     </div>
