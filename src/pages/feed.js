@@ -13,6 +13,8 @@ export default function Feed({ userId = 1 }) {
   const textareaRef = useRef(null);
   const [activeNavItem, setActiveNavItem] = useState("home");
   const [feedPosts, setFeedPosts] = useState([]);
+  const [showAlert, setShowAlert] = useState(false);
+  const [showTextAlert, setShowTextAlert] = useState(false);
   const navigate = useNavigate();
   // useEffect(() => {
 
@@ -249,11 +251,14 @@ const userPosts = [
 
 // Modifique a função do botão "Publicar" para:
 const handlePublishPost = () => {
-  if (!postText.trim() && selectedFiles.length === 0) return;
+  if (!postText.trim()) {
+    setShowTextAlert(true);
+    return;
+  }
 
   // Criar o novo post
   const newPost = {
-    id: Date.now(), // ID único baseado no timestamp
+    id: Date.now(),
     author: userData,
     content: postText,
     media: selectedFiles.map(file => ({
@@ -267,10 +272,7 @@ const handlePublishPost = () => {
     isLiked: false
   };
 
-  // Adicionar o post no início da lista (posts mais recentes primeiro)
   setFeedPosts(prev => [newPost, ...prev]);
-
-  // Limpar o formulário
   setPostText('');
   setSelectedFiles([]);
 };
@@ -360,9 +362,16 @@ const handlePublishPost = () => {
             multiple
             accept="image/*"
             onChange={(e) => {
-              const files = Array.from(e.target.files);
-              setSelectedFiles(prev => [...prev, ...files]);
-            }}
+  const files = Array.from(e.target.files);
+  
+  if (selectedFiles.length > 0 || files.length > 1) {
+    setShowAlert(true);
+    e.target.value = '';
+    return;
+  }
+  
+  setSelectedFiles(files); // Remove o prev => [...prev, ...files]
+}}
             style={{ display: 'none' }}
           />
           <PhotoIcon />
@@ -375,19 +384,25 @@ const handlePublishPost = () => {
     multiple
     accept="video/mp4,video/webm,video/ogg,video/quicktime,video/x-msvideo"
     onChange={(e) => {
-      const files = Array.from(e.target.files);
-      // Filtrar apenas formatos suportados
-      const supportedFiles = files.filter(file => 
-        file.type.startsWith('video/') && 
-        ['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime', 'video/x-msvideo'].includes(file.type)
-      );
-      
-      if (supportedFiles.length !== files.length) {
-        alert('Alguns arquivos não são suportados. Use MP4, WebM ou OGG.');
-      }
-      
-      setSelectedFiles(prev => [...prev, ...supportedFiles]);
-    }}
+  const files = Array.from(e.target.files);
+  
+  if (selectedFiles.length > 0 || files.length > 1) {
+    setShowAlert(true);
+    e.target.value = '';
+    return;
+  }
+  
+  const supportedFiles = files.filter(file => 
+    file.type.startsWith('video/') && 
+    ['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime', 'video/x-msvideo'].includes(file.type)
+  );
+  
+  if (supportedFiles.length !== files.length) {
+    alert('Alguns arquivos não são suportados. Use MP4, WebM ou OGG.');
+  }
+  
+  setSelectedFiles(supportedFiles); 
+}}
     style={{ display: 'none' }}
   />
   <VideoIcon />
@@ -397,13 +412,60 @@ const handlePublishPost = () => {
 
       <button 
         className={`post-button ${postText.trim() || selectedFiles.length > 0 ? 'active' : 'disabled'}`}
-        disabled={!postText.trim() && selectedFiles.length === 0}
         onClick={handlePublishPost}
       >
         Publicar
       </button>
     </div>
   </div>
+  {/* Alerta de limite de mídia */}
+{showAlert && (
+  <div className="modern-alert-overlay" onClick={() => setShowAlert(false)}>
+    <div className="modern-alert-container" onClick={(e) => e.stopPropagation()}>
+      <div className="modern-alert-content">
+        <div className="alert-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="10" fill="rgba(107, 123, 196, 0.1)" stroke="rgba(107, 123, 196, 1)" strokeWidth="2"/>
+            <line x1="12" y1="16" x2="12" y2="12" stroke="rgba(107, 123, 196, 1)" strokeWidth="2" strokeLinecap="round"/>
+            <circle cx="12" cy="8" r="1" fill="rgba(107, 123, 196, 1)"/>
+          </svg>
+        </div>
+        <div className="alert-text">
+          <h3>Limite de mídia atingido</h3>
+          <p>Por enquanto, você pode adicionar apenas 1 arquivo de mídia por post. Estamos trabalhando para melhorar essa funcionalidade!</p>
+        </div>
+        <button className="alert-close-btn" onClick={() => setShowAlert(false)}>
+          <CloseIcon />
+        </button>
+      </div>
+      <div className="alert-progress-bar"></div>
+    </div>
+  </div>
+)}
+{/* Alerta de texto obrigatório */}
+{showTextAlert && (
+  <div className="modern-alert-overlay" onClick={() => setShowTextAlert(false)}>
+    <div className="modern-alert-container" onClick={(e) => e.stopPropagation()}>
+      <div className="modern-alert-content">
+        <div className="alert-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="10" fill="rgba(239, 68, 68, 0.1)" stroke="rgba(239, 68, 68, 1)" strokeWidth="2"/>
+            <line x1="12" y1="16" x2="12" y2="12" stroke="rgba(239, 68, 68, 1)" strokeWidth="2" strokeLinecap="round"/>
+            <circle cx="12" cy="8" r="1" fill="rgba(239, 68, 68, 1)"/>
+          </svg>
+        </div>
+        <div className="alert-text">
+          <h3>Texto obrigatório</h3>
+          <p>Você precisa escrever algo no seu post! Conte-nos o que você está pensando.</p>
+        </div>
+        <button className="alert-close-btn" onClick={() => setShowTextAlert(false)}>
+          <CloseIcon />
+        </button>
+      </div>
+      <div className="alert-progress-bar-red"></div>
+    </div>
+  </div>
+)}
 </div>
 
       {/* Conteúdo Principal */}
