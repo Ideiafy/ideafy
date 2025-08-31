@@ -5,7 +5,12 @@ import { useNavigate } from 'react-router-dom';
 
 
 
-export default function Card({ showFollowButton = false, additionalPosts = [] }) {
+export default function Card({ 
+  showFollowButton = false,
+  additionalPosts = [] ,    
+  currentUserId = null, 
+  onDeletePost = null 
+}) {
   const [activeTab, setActiveTab] = useState("posts");
   const [likedPosts, setLikedPosts] = useState(new Set());
   const [commentModal, setCommentModal] = useState({
@@ -14,6 +19,10 @@ export default function Card({ showFollowButton = false, additionalPosts = [] })
   });
   const [comments, setComments] = useState({});
   const inputRef = useRef(null);
+  const [deleteModal, setDeleteModal] = useState({
+  isOpen: false,
+  postId: null,
+});
 
   const [lightboxImage, setLightboxImage] = useState(null);
   const [isFollowing, setIsFollowing] = useState(false);
@@ -29,6 +38,7 @@ export default function Card({ showFollowButton = false, additionalPosts = [] })
 
   // Mock data do usuário
   const userData = {
+    id:"1",
     name: "Lucas Alves",
     username: "@lucasalves",
     bio: "Desenvolvedor Full Stack apaixonado por tecnologia e inovação. Criando soluções que fazem a diferença no mundo digital.",
@@ -48,6 +58,7 @@ export default function Card({ showFollowButton = false, additionalPosts = [] })
     {
       id: 1,
       author: userData,
+      authorId: userData.id,
       content:
         "Acabei de finalizar um projeto incrível usando React e Node.js! A sensação de ver tudo funcionando perfeitamente é indescritível. 🚀",
       media: [
@@ -65,6 +76,7 @@ export default function Card({ showFollowButton = false, additionalPosts = [] })
     {
       id: 2,
       author: userData,
+      authorId: userData.id,
       content:
         "Compartilhando algumas dicas de UI/UX que aprendi esta semana. O design é muito mais do que apenas fazer algo bonito - é sobre criar experiências memoráveis!",
       media: [
@@ -87,6 +99,7 @@ export default function Card({ showFollowButton = false, additionalPosts = [] })
     {
       id: 3,
       author: userData,
+      authorId: userData.id,
       content:
         "Hoje foi dia de contribuir com open source! Nada melhor do que retribuir para a comunidade que tanto me ensinou.",
       media: [],
@@ -99,7 +112,55 @@ export default function Card({ showFollowButton = false, additionalPosts = [] })
 
   const allPosts = [...additionalPosts, ...userPosts];
 
+  const openDeleteModal = (postId) => {
+  setDeleteModal({ isOpen: true, postId });
+};
+
+const closeDeleteModal = () => {
+  setDeleteModal({ isOpen: false, postId: null });
+};
+
+const confirmDeletePost = () => {
+  if (onDeletePost && deleteModal.postId) {
+    onDeletePost(deleteModal.postId);
+  }
+  closeDeleteModal();
+};
+const canDeletePost = (post) => {
+  return currentUserId && (post.author.id === currentUserId || post.authorId === currentUserId);
+};
+
+
+
   // Ícones SVG
+  const TrashIcon = () => (
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+  >
+    <polyline points="3,6 5,6 21,6" />
+    <path d="M19,6v14a2,2,0,0,1-2,2H7a2,2,0,0,1-2-2V6m3,0V4a2,2,0,0,1,2-2h4a2,2,0,0,1,2,2v2" />
+  </svg>
+);
+
+const MoreIcon = () => (
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+  >
+    <circle cx="12" cy="12" r="1" />
+    <circle cx="19" cy="12" r="1" />
+    <circle cx="5" cy="12" r="1" />
+  </svg>
+);
   const HeartIcon = () => (
     <svg
       width="20"
@@ -257,6 +318,7 @@ const openCommentModal = (postId) => {
     };
 
     const currentMedia = media[currentIndex];
+    
 
     return (
       <div
@@ -597,7 +659,45 @@ const openCommentModal = (postId) => {
       </div>
     );
   };
+const DeleteConfirmModal = () => {
+  if (!deleteModal.isOpen) return null;
 
+  return (
+    <div
+      className="userProfile-deleteModal"
+      onClick={closeDeleteModal}
+    >
+      <div
+        className="userProfile-deleteModalContent"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="userProfile-deleteModalHeader">
+          <h3>Deletar Post</h3>
+        </div>
+        
+        <div className="userProfile-deleteModalBody">
+          <p>Tem certeza que deseja deletar este post? Esta ação não pode ser desfeita.</p>
+        </div>
+        
+        <div className="userProfile-deleteModalActions">
+          <button
+            className="userProfile-cancelBtn"
+            onClick={closeDeleteModal}
+          >
+            Cancelar
+          </button>
+          <button
+            className="userProfile-confirmDeleteBtn"
+            onClick={confirmDeletePost}
+          >
+            <TrashIcon />
+            Deletar
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
   // Return do componente principal
   return (
     <>
@@ -607,30 +707,54 @@ const openCommentModal = (postId) => {
             {allPosts.map((post) => (
   <article key={post.id} className="userProfile-postCard">
                 <div className="userProfile-postHeader">
-                  <div className="userProfile-postUserAvatar" onClick={UserConta}>
-                    <img src={post.author.avatar} alt={post.author.name} />
-                    {post.author.isOnline && (
-                      <div className="userProfile-onlineStatus"></div>
-                    )}
-                  </div>
-                  <div className="userProfile-postUserInfo">
-                    <h4 className="userProfile-postUserName">
-                      {post.author.name}
-                    </h4>
-                    <span className="userProfile-postTime">{post.time}</span>
-                  </div>
-                  {showFollowButton && (
-                  <button
-                    className={`userProfile-followBtn ${
-                      isFollowing ? "following" : ""
-                    }`}
-                    onClick={toggleFollow}
-                  >
-                    {isFollowing ? <UserCheckIcon /> : <UserPlusIcon />}
-                    <span>{isFollowing ? "Seguindo" : "Seguir"}</span>
-                  </button>
-                )}
-                </div>
+  <div className="userProfile-postUserAvatar" onClick={UserConta}>
+    <img src={post.author.avatar} alt={post.author.name} />
+    {post.author.isOnline && (
+      <div className="userProfile-onlineStatus"></div>
+    )}
+  </div>
+  <div className="userProfile-postUserInfo">
+    <h4 className="userProfile-postUserName">
+      {post.author.name}
+    </h4>
+    <span className="userProfile-postTime">{post.time}</span>
+  </div>
+  
+  {/* Área dos botões de ação */}
+  <div className="userProfile-postHeaderActions">
+    {showFollowButton && (
+      <button
+        className={`userProfile-followBtn ${
+          isFollowing ? "following" : ""
+        }`}
+        onClick={toggleFollow}
+      >
+        {isFollowing ? <UserCheckIcon /> : <UserPlusIcon />}
+        <span>{isFollowing ? "Seguindo" : "Seguir"}</span>
+      </button>
+    )}
+    
+    {canDeletePost(post) && (
+      <div className="userProfile-postOptions">
+        <button 
+          className="userProfile-optionsBtn"
+          onClick={() => openDeleteModal(post.id)}
+        >
+          <MoreIcon />
+        </button>
+        <div className="userProfile-optionsMenu">
+          <button 
+            className="userProfile-deleteBtn"
+            onClick={() => openDeleteModal(post.id)}
+          >
+            <TrashIcon />
+            <span>Deletar</span>
+          </button>
+        </div>
+      </div>
+    )}
+  </div>
+</div>
 
                 <p className="userProfile-postText">{post.content}</p>
 
@@ -692,6 +816,7 @@ const openCommentModal = (postId) => {
       {/* Modais */}
       <Lightbox />
       <CommentModal />
+      <DeleteConfirmModal />
     </>
   );
 }

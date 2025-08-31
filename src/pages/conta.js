@@ -19,7 +19,17 @@ export default function UserProfile({ userId = 1 }) {
   const [comments, setComments] = useState({});
   const [newComment, setNewComment] = useState('');
   const [user,setUser] = useState(null)
+  const currentUser = { id: "1" };
   const navigate = useNavigate();
+  const handleDeletePost = (postId) => {
+    // Aqui você implementa a lógica para deletar o post
+    console.log('Deletando post:', postId);
+    
+    // Exemplo de chamada para API
+    // deletePostAPI(postId).then(() => {
+    //   // Atualizar lista de posts
+    // });
+  };
 
   //  async function fetchUserData(token)
   //   {
@@ -339,7 +349,12 @@ export default function UserProfile({ userId = 1 }) {
 <div className="userProfile-tabContent">
   {activeTab === 'posts' && (
     <div className="userProfile-postsContent">
-        <Card/>
+        <Card
+          showFollowButton={false}
+        currentUserId={currentUser.id}
+        onDeletePost={handleDeletePost}
+        additionalPosts={[]}
+        />
         {/* <div className="userProfile-emptyState">
           Nenhum post ainda
         </div> */}
