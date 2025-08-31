@@ -20,53 +20,53 @@ export default function Register() {
     setTema((prev) => (prev === "escuro" ? "claro" : "escuro"));
   };
 
-  async function  handleSubmit (e) {
-    e.preventDefault();
+  // async function  handleSubmit (e) {
+  //   e.preventDefault();
     
-    if (currentStep < totalSteps) {
-        // Validações por step
-        if (currentStep === 1 && !name.trim()) {
-            alert('Por favor, digite seu  nome completo ');
-            return;
-        }
+  //   if (currentStep < totalSteps) {
+  //       // Validações por step
+  //       if (currentStep === 1 && !name.trim()) {
+  //           alert('Por favor, digite seu  nome completo ');
+  //           return;
+  //       }
 
-         if (currentStep === 2 && !username.trim()) {
-            alert('Por favor, digite um nome de usuário');
-            return;
-        }
+  //        if (currentStep === 2 && !username.trim()) {
+  //           alert('Por favor, digite um nome de usuário');
+  //           return;
+  //       }
 
-        if (currentStep === 3 && !email.trim()) {
-            alert('Por favor, digite um email válido');
-            return;
-        }
-        if (currentStep === 4 && !password.trim()) {
-            alert('Por favor, digite uma senha');
-            return;
-        }
+  //       if (currentStep === 3 && !email.trim()) {
+  //           alert('Por favor, digite um email válido');
+  //           return;
+  //       }
+  //       if (currentStep === 4 && !password.trim()) {
+  //           alert('Por favor, digite uma senha');
+  //           return;
+  //       }
 
        
         
-        setCurrentStep(currentStep + 1);
-    } else {
-        // Última etapa - validação final e envio
-        if (password !== confirmPassword) {
-            alert('As senhas não coincidem');
-            return;
-        }
+  //       setCurrentStep(currentStep + 1);
+  //   } else {
+  //       // Última etapa - validação final e envio
+  //       if (password !== confirmPassword) {
+  //           alert('As senhas não coincidem');
+  //           return;
+  //       }
         
-        // Lógica de registro aqui
+  //       // Lógica de registro aqui
 
-        console.log("Register attempt:", { name,username,email, password });
+  //       console.log("Register attempt:", { name,username,email, password });
 
-        const response = await store(name,username,email,password);
-        if(response.status == 200)
-        {
-          navigate('/login');
-        }
-      }
+  //       const response = await store(name,username,email,password);
+  //       if(response.status == 200)
+  //       {
+  //         navigate('/login');
+  //       }
+  //     }
 
 
-  };
+  // };
 
   const handleSocialLogin = (provider) => {
     console.log(`Login with ${provider}`);
@@ -221,7 +221,8 @@ export default function Register() {
           </p>
         </div>
 
-        <form className="loginForm" onSubmit={handleSubmit}>
+          {/* onSubmit={handleSubmit} */}
+        <form className="loginForm" >
     {/* Indicador de progresso */}
     <div className="stepIndicator">
         <div className="stepProgress">

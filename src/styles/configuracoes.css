@@ -896,3 +896,116 @@
     padding-bottom: 85px !important;
   }
 }
+.modern-avatar-placeholder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 4px solid rgba(107, 123, 196, 0.3);
+  box-shadow: 0 8px 32px rgba(107, 123, 196, 0.2);
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  display: none; /* Por padrão escondido */
+  align-items: center;
+  justify-content: center;
+  color: rgba(107, 123, 196, 0.6);
+  transition: var(--transition-theme);
+  cursor: pointer;
+}
+
+.modern-avatar-placeholder:hover {
+  transform: scale(1.05);
+  box-shadow: 0 12px 40px rgba(107, 123, 196, 0.3);
+  color: rgba(107, 123, 196, 0.8);
+}
+
+.modern-avatar-placeholder.show {
+  display: flex !important;
+}
+
+/* Tema escuro para o placeholder */
+.escuro-fundo-cinza .modern-avatar-placeholder {
+  background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+  border-color: rgba(107, 123, 196, 0.4);
+  color: rgba(107, 123, 196, 0.7);
+}
+
+.escuro-fundo-cinza .modern-avatar-placeholder:hover {
+  color: rgba(107, 123, 196, 0.9);
+}
+
+/* Botão de editar (mantém a posição correta) */
+.modern-avatar-edit {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  width: 44px;
+  height: 44px;
+  background: var(--primary-color);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: white;
+  transition: var(--transition-theme);
+  box-shadow: 0 4px 16px rgba(107, 123, 196, 0.4);
+  border: 3px solid rgba(255, 255, 255, 0.9);
+  z-index: 10; /* Para ficar acima do placeholder */
+}
+
+.modern-avatar-edit:hover {
+  background: rgba(107, 123, 196, 0.9);
+  transform: scale(1.1);
+  box-shadow: 0 6px 24px rgba(107, 123, 196, 0.5);
+}
+
+/* ===== RESPONSIVIDADE ===== */
+
+/* Tablets */
+@media (max-width: 1024px) {
+  .modern-avatar-container {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .modern-avatar-container {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .modern-avatar-edit {
+    width: 36px;
+    height: 36px;
+    bottom: 4px;
+    right: 4px;
+  }
+  
+  .modern-avatar-edit svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+/* Mobile pequeno */
+@media (max-width: 480px) {
+  .modern-avatar-container {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .modern-avatar-edit {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .modern-avatar-edit svg {
+    width: 14px;
+    height: 14px;
+  }
+}

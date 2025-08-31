@@ -21,16 +21,18 @@ export default function UserProfile({ userId = 1 }) {
   const [user,setUser] = useState(null)
   const navigate = useNavigate();
 
-   async function fetchUserData(token)
-    {
-      const response = await logged(token)
-      setUser(response.data)
-    }
+  //  async function fetchUserData(token)
+  //   {
+  //     const response = await logged(token)
+  //     setUser(response.data)
+  //   }
 
-  useEffect(() => {
-    const token = findToken()
-    fetchUserData(token)
-  },[])
+  // useEffect(() => {
+  //   const token = findToken()
+  //   fetchUserData(token)
+  // },[])
+
+  
 
   const toggleTema = () => {
     setTema((prev) => (prev === "escuro" ? "claro" : "escuro"));
@@ -210,6 +212,20 @@ export default function UserProfile({ userId = 1 }) {
       <line x1="3" y1="10" x2="21" y2="10"/>
     </svg>
   );
+  const CameraIcon = () => (
+  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+    <circle cx="12" cy="13" r="4"/>
+  </svg>
+);
+
+  const getProfileImage = (userAvatar) => {
+  // Se o usuário não tem avatar ou está vazio/nulo, retorna a imagem padrão
+  if (!userAvatar || userAvatar.trim() === '') {
+    return Images.PhotoCard || "/default-avatar.jpg"; // ou qualquer imagem padrão que você tenha
+  }
+  return userAvatar;
+};
 
 
   return (
@@ -231,7 +247,25 @@ export default function UserProfile({ userId = 1 }) {
         <div className="userProfile-header">
   {/* Avatar centralizado no topo */}
   <div className="userProfile-avatarContainer">
-    <img src={userData.avatar} alt={ user?.name || "Loading..."} className="userProfile-avatar" />
+{user?.avatar ? (
+    <img 
+      src={user.avatar} 
+      alt={user?.name || "Loading..."} 
+      className="userProfile-avatar"
+      onError={(e) => {
+        // Se a imagem falhar, esconde a img e mostra o ícone
+        e.target.style.display = 'none';
+        e.target.nextElementSibling.style.display = 'flex';
+      }}
+    />
+  ) : null}
+  <div 
+    className={`userProfile-avatarPlaceholder ${!user?.avatar ? 'show' : ''}`}
+    style={{ display: !user?.avatar ? 'flex' : 'none' }}
+  >
+    <CameraIcon />
+  </div>
+
     {userData.isOnline && <div className="userProfile-onlineStatus"></div>}
   </div>
   

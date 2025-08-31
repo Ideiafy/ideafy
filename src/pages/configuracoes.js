@@ -37,21 +37,21 @@ export default function MinhaContaPage() {
     confirmPassword: ""
   });
 
-    async function fetchUserData(token)
-    {
-      const response = await logged(token)
-      setUser(response.data)
-    }
+    // async function fetchUserData(token)
+    // {
+    //   const response = await logged(token)
+    //   setUser(response.data)
+    // }
 
-      useEffect(() => {
-        const token = findToken()
+    //   useEffect(() => {
+    //     const token = findToken()
 
-        if(!token)
-        {
-          navigate('/login');
-        }
-        fetchUserData(token)
-      },[])
+    //     if(!token)
+    //     {
+    //       navigate('/login');
+    //     }
+    //     fetchUserData(token)
+    //   },[])
 
 
 
@@ -67,29 +67,100 @@ export default function MinhaContaPage() {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleAvatarChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      console.log("Uploading avatar:", file);
-    }
-  };
-  async function handleLogout () {
-  if (window.confirm("Tem certeza que deseja sair da sua conta?")) {
-    // Aqui você implementa a lógica de logout
-    const token = findToken();
-    const response = await logout(token);
-
-    if(response.status == 200)
-    {
-      console.log("Logout realizado");
-      localStorage.clear();
-      return navigate('/login');
+const handleAvatarChange = (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    // Validar tipo de arquivo
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      alert('Por favor, selecione apenas arquivos de imagem (JPG, PNG, GIF, WEBP)');
+      return;
     }
     
+    // Validar tamanho do arquivo (5MB máximo)
+    const maxSize = 5 * 1024 * 1024; // 5MB em bytes
+    if (file.size > maxSize) {
+      alert('O arquivo deve ter no máximo 5MB');
+      return;
+    }
     
-    // Exemplo: limpar localStorage, redirecionar, etc.
+    // Criar URL temporária para preview
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const imageUrl = e.target.result;
+      
+      // Atualizar o estado do userProfile com a nova imagem
+      setUserProfile(prev => ({
+        ...prev,
+        avatar: imageUrl
+      }));
+      
+      // Também atualizar o estado user se necessário
+      setUser(prev => ({
+        ...prev,
+        avatar: imageUrl
+      }));
+      
+      console.log("Avatar atualizado com sucesso!");
+      
+      // AQUI VOCÊ PODE ADICIONAR A LÓGICA PARA ENVIAR PARA O SERVIDOR
+      // uploadAvatarToServer(file);
+    };
+    
+    reader.onerror = () => {
+      alert('Erro ao carregar a imagem');
+    };
+    
+    reader.readAsDataURL(file);
   }
 };
+
+// 2. OPCIONAL: Adicione esta função para enviar para o servidor (descomente quando necessário)
+/*
+const uploadAvatarToServer = async (file) => {
+  const formData = new FormData();
+  formData.append('avatar', file);
+  
+  try {
+    const token = findToken();
+    const response = await fetch('/api/user/avatar', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+      body: formData
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      console.log('Avatar enviado para servidor:', data);
+    } else {
+      throw new Error('Erro ao enviar avatar');
+    }
+  } catch (error) {
+    console.error('Erro no upload:', error);
+    alert('Erro ao salvar a imagem');
+  }
+};
+*/
+
+//   async function handleLogout () {
+//   if (window.confirm("Tem certeza que deseja sair da sua conta?")) {
+//     // Aqui você implementa a lógica de logout
+//     const token = findToken();
+//     const response = await logout(token);
+
+//     if(response.status == 200)
+//     {
+//       console.log("Logout realizado");
+//       localStorage.clear();
+//       return navigate('/login');
+//     }
+    
+    
+//     // Exemplo: limpar localStorage, redirecionar, etc.
+//   }
+// };
 
 const handleSaveProfile = () => {
   setUserProfile(prev => ({
@@ -155,6 +226,12 @@ const handleSaveProfile = () => {
       <line x1="21" y1="12" x2="9" y2="12"/>
     </svg>
   );
+  const CameraPlaceholderIcon = () => (
+  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+    <circle cx="12" cy="13" r="4"/>
+  </svg>
+);
   const renderTabContent = () => {
     switch (activeTab) {
       case "pessoais":
@@ -295,7 +372,8 @@ const handleSaveProfile = () => {
     <h4 className="action-title">Sair da Conta</h4>
     <p className="action-desc">Desconecte-se da sua conta atual</p>
   </div>
-  <button onClick={handleLogout} className="modern-action-btn logout">
+  {/* onClick={handleLogout} */}
+  <button  className="modern-action-btn logout">
     <LogOutIcon />
     Sair
   </button>
@@ -344,14 +422,25 @@ const tabs = [
             <div className="profile-hero">
               <div className="profile-avatar-section">
                 <div className="modern-avatar-container">
-                  <img
-                    src={userProfile.avatar}
-                    alt={userProfile.name}
-                    className="modern-avatar"
-                    onError={(e) => {
-                      e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM2QjdCQzQiIHN0cm9rZS13aWR0aD0iMiI+PGNpcmNsZSBjeD0iMTIiIGN5PSI3IiByPSI0Ii8+PHBhdGggZD0iTTIwIDIxdi0yYTQgNCAwIDAgMC00LTRIOGE0IDQgMCAwIDAtNCA0djIiLz48L3N2Zz4=';
-                    }}
-                  />
+                  {user?.avatar ? (
+    <img
+      src={user.avatar}
+      alt={user?.name || "Loading..."}
+      className="modern-avatar"
+      onError={(e) => {
+        // Se a imagem falhar, esconde a img e mostra o ícone
+        e.target.style.display = 'none';
+        e.target.nextElementSibling.style.display = 'flex';
+      }}
+    />
+  ) : null}
+  
+  <div 
+    className={`modern-avatar-placeholder ${!user?.avatar ? 'show' : ''}`}
+    style={{ display: !user?.avatar ? 'flex' : 'none' }}
+  >
+    <CameraPlaceholderIcon />
+  </div>
                   <label className="modern-avatar-edit">
                     <CameraIcon />
                     <input

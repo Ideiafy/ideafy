@@ -21,24 +21,24 @@ export default function Feed({ userId = 1 }) {
   const navigate = useNavigate();
    
 
-    async function fetchUserData(token)
-    {
-      const response = await logged(token)
-      setUser(response.data)
-    }
-    useEffect(() => {
+    // async function fetchUserData(token)
+    // {
+    //   const response = await logged(token)
+    //   setUser(response.data)
+    // }
+    // useEffect(() => {
 
-      const token = findToken();
-      console.log(token)
-      if (!token) {
-        return navigate("/login");
-      } 
-        fetchUserData(token);
+    //   const token = findToken();
+    //   console.log(token)
+    //   if (!token) {
+    //     return navigate("/login");
+    //   } 
+    //     fetchUserData(token);
       
 
-      //localStorage.clear();
+    //   //localStorage.clear();
 
-    }, []);
+    // }, []);
 
 
 
