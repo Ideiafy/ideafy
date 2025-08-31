@@ -14,6 +14,19 @@ export default function MinhaContaPage() {
   const [activeTab, setActiveTab] = useState("pessoais");
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [user,setUser] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState({
+  isOpen: false,
+  imageUrl: null,
+  file: null
+});
+const [confirmationModal, setConfirmationModal] = useState({
+  isOpen: false,
+  type: '', // 'logout', 'deactivate', 'delete'
+  title: '',
+  message: '',
+  confirmText: '',
+  onConfirm: null
+});
   const navigate = useNavigate();
 
   // Estados do usuário
@@ -84,27 +97,14 @@ const handleAvatarChange = (event) => {
       return;
     }
     
-    // Criar URL temporária para preview
+    // Criar preview da imagem
     const reader = new FileReader();
     reader.onload = (e) => {
-      const imageUrl = e.target.result;
-      
-      // Atualizar o estado do userProfile com a nova imagem
-      setUserProfile(prev => ({
-        ...prev,
-        avatar: imageUrl
-      }));
-      
-      // Também atualizar o estado user se necessário
-      setUser(prev => ({
-        ...prev,
-        avatar: imageUrl
-      }));
-      
-      console.log("Avatar atualizado com sucesso!");
-      
-      // AQUI VOCÊ PODE ADICIONAR A LÓGICA PARA ENVIAR PARA O SERVIDOR
-      // uploadAvatarToServer(file);
+      setAvatarPreview({
+        isOpen: true,
+        imageUrl: e.target.result,
+        file: file
+      });
     };
     
     reader.onerror = () => {
@@ -113,36 +113,11 @@ const handleAvatarChange = (event) => {
     
     reader.readAsDataURL(file);
   }
+  
+  // Limpar o input para permitir selecionar a mesma imagem novamente
+  event.target.value = '';
 };
 
-// 2. OPCIONAL: Adicione esta função para enviar para o servidor (descomente quando necessário)
-/*
-const uploadAvatarToServer = async (file) => {
-  const formData = new FormData();
-  formData.append('avatar', file);
-  
-  try {
-    const token = findToken();
-    const response = await fetch('/api/user/avatar', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      },
-      body: formData
-    });
-    
-    if (response.ok) {
-      const data = await response.json();
-      console.log('Avatar enviado para servidor:', data);
-    } else {
-      throw new Error('Erro ao enviar avatar');
-    }
-  } catch (error) {
-    console.error('Erro no upload:', error);
-    alert('Erro ao salvar a imagem');
-  }
-};
-*/
 
 //   async function handleLogout () {
 //   if (window.confirm("Tem certeza que deseja sair da sua conta?")) {
@@ -162,6 +137,33 @@ const uploadAvatarToServer = async (file) => {
 //   }
 // };
 
+const handleLogout = () => {
+  setConfirmationModal({
+    isOpen: true,
+    type: 'logout',
+    title: 'Sair da Conta',
+    message: 'Tem certeza que deseja sair da sua conta? Você precisará fazer login novamente para acessar.',
+    confirmText: 'Sair',
+    onConfirm: async () => {
+      try {
+        const token = findToken();
+        const response = await logout(token);
+
+        if(response.status === 200) {
+          console.log("Logout realizado");
+          localStorage.clear();
+          navigate('/login');
+        }
+      } catch (error) {
+        console.error("Erro ao fazer logout:", error);
+        alert("Erro ao sair da conta. Tente novamente.");
+      } finally {
+        setConfirmationModal({ isOpen: false, type: '', title: '', message: '', confirmText: '', onConfirm: null });
+      }
+    }
+  });
+};
+
 const handleSaveProfile = () => {
   setUserProfile(prev => ({
     ...prev,
@@ -180,6 +182,100 @@ const handleSaveProfile = () => {
     }
     console.log("Password changed");
   };
+
+  const confirmAvatarChange = () => {
+  // Aplicar a nova imagem
+  setUserProfile(prev => ({
+    ...prev,
+    avatar: avatarPreview.imageUrl
+  }));
+  
+  setUser(prev => ({
+    ...prev,
+    avatar: avatarPreview.imageUrl
+  }));
+  
+  // Fechar o modal
+  setAvatarPreview({
+    isOpen: false,
+    imageUrl: null,
+    file: null
+  });
+  
+  console.log("Avatar atualizado com sucesso!");
+  
+  // AQUI VOCÊ PODE ADICIONAR A LÓGICA PARA ENVIAR PARA O SERVIDOR
+  // uploadAvatarToServer(avatarPreview.file);
+};
+
+const cancelAvatarChange = () => {
+  setAvatarPreview({
+    isOpen: false,
+    imageUrl: null,
+    file: null
+  });
+};
+
+const handleDeactivateAccount = () => {
+  setConfirmationModal({
+    isOpen: true,
+    type: 'deactivate',
+    title: 'Desativar Conta',
+    message: 'Sua conta será temporariamente desativada. Você poderá reativá-la fazendo login novamente. Tem certeza que deseja continuar?',
+    confirmText: 'Desativar',
+    onConfirm: async () => {
+      try {
+        // Aqui você implementaria a lógica de desativação
+        console.log("Conta desativada");
+        // const response = await deactivateAccount(token);
+        alert("Conta desativada com sucesso!");
+      } catch (error) {
+        console.error("Erro ao desativar conta:", error);
+        alert("Erro ao desativar conta. Tente novamente.");
+      } finally {
+        setConfirmationModal({ isOpen: false, type: '', title: '', message: '', confirmText: '', onConfirm: null });
+      }
+    }
+  });
+};
+
+const handleDeleteAccount = () => {
+  setConfirmationModal({
+    isOpen: true,
+    type: 'delete',
+    title: 'Excluir Conta',
+    message: 'ATENÇÃO: Esta ação é irreversível! Todos os seus dados serão permanentemente removidos e não poderão ser recuperados. Tem absoluta certeza que deseja excluir sua conta?',
+    confirmText: 'Excluir Permanentemente',
+    onConfirm: async () => {
+      try {
+        // Aqui você implementaria a lógica de exclusão
+        console.log("Conta excluída");
+        // const response = await deleteAccount(token);
+        alert("Conta excluída com sucesso!");
+        localStorage.clear();
+        navigate('/');
+      } catch (error) {
+        console.error("Erro ao excluir conta:", error);
+        alert("Erro ao excluir conta. Tente novamente.");
+      } finally {
+        setConfirmationModal({ isOpen: false, type: '', title: '', message: '', confirmText: '', onConfirm: null });
+      }
+    }
+  });
+};
+
+const closeConfirmationModal = () => {
+  setConfirmationModal({ 
+    isOpen: false, 
+    type: '', 
+    title: '', 
+    message: '', 
+    confirmText: '', 
+    onConfirm: null 
+  });
+};
+
+
 
   // Ícones SVG otimizados
   const UserIcon = () => (
@@ -230,6 +326,18 @@ const handleSaveProfile = () => {
   <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
     <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
     <circle cx="12" cy="13" r="4"/>
+  </svg>
+);
+const CheckIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <polyline points="20,6 9,17 4,12"/>
+  </svg>
+);
+
+const XIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <line x1="18" y1="6" x2="6" y2="18"/>
+    <line x1="6" y1="6" x2="18" y2="18"/>
   </svg>
 );
   const renderTabContent = () => {
@@ -360,32 +468,35 @@ const handleSaveProfile = () => {
                 </div>
                 
                 <div className="modern-action-item">
-                  <div className="action-content">
-                    <h4 className="action-title">Desativar Conta</h4>
-                    <p className="action-desc">Temporariamente desative sua conta</p>
-                  </div>
-                  <button className="modern-action-btn secondary">Desativar</button>
-                </div>
+  <div className="action-content">
+    <h4 className="action-title">Desativar Conta</h4>
+    <p className="action-desc">Temporariamente desative sua conta</p>
+  </div>
+  <button onClick={handleDeactivateAccount} className="modern-action-btn secondary">
+    Desativar
+  </button>
+</div>
 
-                                <div className="modern-action-item">
+<div className="modern-action-item">
   <div className="action-content">
     <h4 className="action-title">Sair da Conta</h4>
     <p className="action-desc">Desconecte-se da sua conta atual</p>
   </div>
-  {/* onClick={handleLogout} */}
-  <button  className="modern-action-btn logout">
+  <button onClick={handleLogout} className="modern-action-btn logout">
     <LogOutIcon />
     Sair
   </button>
 </div>
-                
-                <div className="modern-action-item danger">
-                  <div className="action-content">
-                    <h4 className="action-title">Excluir Conta</h4>
-                    <p className="action-desc">Remova permanentemente sua conta</p>
-                  </div>
-                  <button className="modern-action-btn danger">Excluir</button>
-                </div>
+
+<div className="modern-action-item danger">
+  <div className="action-content">
+    <h4 className="action-title">Excluir Conta</h4>
+    <p className="action-desc">Remova permanentemente sua conta</p>
+  </div>
+  <button onClick={handleDeleteAccount} className="modern-action-btn danger">
+    Excluir
+  </button>
+</div>
 
 
               </div>
@@ -489,6 +600,120 @@ const tabs = [
           </div>
         </div>
       </main>
+
+      {/* Modal de Confirmação de Avatar */}
+{avatarPreview.isOpen && (
+  <div className="avatar-preview-modal">
+    <div className="avatar-preview-backdrop" onClick={cancelAvatarChange}></div>
+    <div className="avatar-preview-content">
+      <div className="avatar-preview-header">
+        <h3>Confirmar nova foto de perfil</h3>
+        <button onClick={cancelAvatarChange} className="avatar-preview-close">
+          <XIcon />
+        </button>
+      </div>
+      
+      <div className="avatar-preview-body">
+        <div className="avatar-preview-comparison">
+          <div className="avatar-preview-section">
+            <span className="avatar-preview-label">Atual</span>
+            <div className="avatar-preview-current">
+              {(user?.avatar || userProfile?.avatar) ? (
+                <img 
+                  src={user?.avatar || userProfile?.avatar} 
+                  alt="Avatar atual"
+                  className="avatar-preview-image"
+                />
+              ) : (
+                <div className="avatar-preview-placeholder">
+                  <CameraIcon />
+                </div>
+              )}
+            </div>
+          </div>
+          
+          <div className="avatar-preview-arrow">→</div>
+          
+          <div className="avatar-preview-section">
+            <span className="avatar-preview-label">Nova</span>
+            <div className="avatar-preview-new">
+              <img 
+                src={avatarPreview.imageUrl} 
+                alt="Nova foto de perfil"
+                className="avatar-preview-image"
+              />
+            </div>
+          </div>
+        </div>
+        
+        <p className="avatar-preview-description">
+          Esta será sua nova foto de perfil. Deseja confirmar a alteração?
+        </p>
+      </div>
+      
+      <div className="avatar-preview-actions">
+        <button onClick={cancelAvatarChange} className="avatar-preview-btn cancel">
+          <XIcon />
+          Cancelar
+        </button>
+        <button onClick={confirmAvatarChange} className="avatar-preview-btn confirm">
+          <CheckIcon />
+          Confirmar
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+{confirmationModal.isOpen && (
+  <div className="confirmation-modal">
+    <div className="confirmation-backdrop" onClick={closeConfirmationModal}></div>
+    <div className="confirmation-content">
+      <div className="confirmation-header">
+        <h3 className="confirmation-title">{confirmationModal.title}</h3>
+        <button onClick={closeConfirmationModal} className="confirmation-close">
+          <XIcon />
+        </button>
+      </div>
+      
+      <div className="confirmation-body">
+        <div className="confirmation-icon">
+          {confirmationModal.type === 'logout' && <LogOutIcon />}
+          {confirmationModal.type === 'deactivate' && <ShieldIcon />}
+          {confirmationModal.type === 'delete' && (
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <polyline points="3,6 5,6 21,6"/>
+              <path d="M19,6V20a2,2,0,0,1-2,2H7a2,2,0,0,1-2-2V6M8,6V4a2,2,0,0,1,2-2h4a2,2,0,0,1,2,2V6"/>
+              <line x1="10" y1="11" x2="10" y2="17"/>
+              <line x1="14" y1="11" x2="14" y2="17"/>
+            </svg>
+          )}
+        </div>
+        
+        <p className="confirmation-message">{confirmationModal.message}</p>
+        
+        {confirmationModal.type === 'delete' && (
+          <div className="confirmation-warning">
+            <strong>Esta ação não pode ser desfeita!</strong>
+          </div>
+        )}
+      </div>
+      
+      <div className="confirmation-actions">
+        <button onClick={closeConfirmationModal} className="confirmation-btn cancel">
+          <XIcon />
+          Cancelar
+        </button>
+        <button 
+          onClick={confirmationModal.onConfirm} 
+          className={`confirmation-btn confirm ${confirmationModal.type}`}
+        >
+          <CheckIcon />
+          {confirmationModal.confirmText}
+        </button>
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 }

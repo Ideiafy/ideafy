@@ -14,6 +14,18 @@ export default function Register() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [currentStep, setCurrentStep] = useState(1);
   const [totalSteps] = useState(5);
+  const [alert, setAlert] = useState({
+  isOpen: false,
+  type: '', // 'error', 'success'
+  title: '',
+  message: '',
+  details: ''
+});
+
+const [fieldErrors, setFieldErrors] = useState({
+  username: false,
+  email: false
+});
   const navigate = useNavigate();
 
   const toggleIcon = () => {
@@ -67,6 +79,141 @@ export default function Register() {
 
 
   // };
+
+  const showAlert = (type, title, message, details = '') => {
+  setAlert({
+    isOpen: true,
+    type,
+    title,
+    message,
+    details
+  });
+
+  // Auto fechar após 5 segundos se for sucesso
+  if (type === 'success') {
+    setTimeout(() => {
+      setAlert({ isOpen: false, type: '', title: '', message: '', details: '' });
+    }, 5000);
+  }
+};
+const closeAlert = () => {
+  setAlert({ isOpen: false, type: '', title: '', message: '', details: '' });
+};
+const validateUsername = async (username) => {
+  // Simular verificação no servidor
+  // const response = await checkUsernameAvailable(username);
+  // return response.available;
+  
+  // Para teste, simular que alguns usernames já existem
+  const unavailableUsernames = ['admin', 'test', 'user', 'lucas', 'ideafy'];
+  return !unavailableUsernames.includes(username.toLowerCase());
+};
+
+const validateEmail = async (email) => {
+  // Simular verificação no servidor
+  // const response = await checkEmailAvailable(email);
+  // return response.available;
+  
+  // Para teste, simular que alguns emails já existem
+  const unavailableEmails = ['admin@test.com', 'test@test.com', 'lucas@exemplo.com'];
+  return !unavailableEmails.includes(email.toLowerCase());
+};
+
+async function handleSubmit(e) {
+  e.preventDefault();
+  
+  if (currentStep < totalSteps) {
+    // Validações por step
+    // if (currentStep === 1 && !name.trim()) {
+    //   showAlert('error', 'Nome obrigatório', 'Por favor, digite seu nome completo para continuar.');
+    //   return;
+    // }
+
+    if (currentStep === 2 && !username.trim()) {
+      showAlert('error', 'Username obrigatório', 'Por favor, digite um nome de usuário para continuar.');
+      return;
+    }
+
+    // Verificar se username já existe
+    if (currentStep === 2 && username.trim()) {
+      const isUsernameAvailable = await validateUsername(username);
+      if (!isUsernameAvailable) {
+        setFieldErrors(prev => ({ ...prev, username: true }));
+        showAlert(
+          'error', 
+          'Username indisponível', 
+          'Este nome de usuário já está sendo usado por outro usuário.',
+          'Tente algo como: @' + username + Math.floor(Math.random() * 1000)
+        );
+        return;
+      } else {
+        setFieldErrors(prev => ({ ...prev, username: false }));
+      }
+    }
+
+    if (currentStep === 3 && !email.trim()) {
+      showAlert('error', 'Email obrigatório', 'Por favor, digite um email válido para continuar.');
+      return;
+    }
+
+    // Verificar se email já existe
+    if (currentStep === 3 && email.trim()) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        showAlert('error', 'Email inválido', 'Por favor, digite um endereço de email válido.');
+        return;
+      }
+
+      const isEmailAvailable = await validateEmail(email);
+      if (!isEmailAvailable) {
+        setFieldErrors(prev => ({ ...prev, email: true }));
+        showAlert(
+          'error', 
+          'Email já cadastrado', 
+          'Este email já possui uma conta cadastrada.',
+          'Tente fazer login ou use outro email.'
+        );
+        return;
+      } else {
+        setFieldErrors(prev => ({ ...prev, email: false }));
+      }
+    }
+
+    if (currentStep === 4 && !password.trim()) {
+      showAlert('error', 'Senha obrigatória', 'Por favor, digite uma senha para continuar.');
+      return;
+    }
+
+    if (currentStep === 4 && password.length < 6) {
+      showAlert('error', 'Senha muito curta', 'A senha deve ter pelo menos 6 caracteres.');
+      return;
+    }
+    
+    setCurrentStep(currentStep + 1);
+  } else {
+    // Última etapa - validação final e envio
+    if (password !== confirmPassword) {
+      showAlert('error', 'Senhas não coincidem', 'As senhas digitadas não são iguais. Verifique e tente novamente.');
+      return;
+    }
+    
+    try {
+      console.log("Register attempt:", { name, username, email, password });
+
+      // Simular chamada de API
+      showAlert('success', 'Conta criada com sucesso!', 'Bem-vindo ao Ideafy! Você será redirecionado para fazer login.');
+      
+      // const response = await store(name, username, email, password);
+      // if(response.status == 200) {
+      setTimeout(() => {
+        navigate('/login');
+      }, 3000);
+      // }
+    } catch (error) {
+      showAlert('error', 'Erro ao criar conta', 'Ocorreu um erro inesperado. Tente novamente em alguns instantes.');
+    }
+  }
+}
 
   const handleSocialLogin = (provider) => {
     console.log(`Login with ${provider}`);
@@ -175,6 +322,12 @@ export default function Register() {
       <path d="M12 19l-7-7 7-7" />
     </svg>
   );
+  const XIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <line x1="18" y1="6" x2="6" y2="18"/>
+    <line x1="6" y1="6" x2="18" y2="18"/>
+  </svg>
+);
 
   return (
     <div
@@ -221,8 +374,7 @@ export default function Register() {
           </p>
         </div>
 
-          {/* onSubmit={handleSubmit} */}
-        <form className="loginForm" >
+        <form className="loginForm" onSubmit={handleSubmit} >
     {/* Indicador de progresso */}
     <div className="stepIndicator">
         <div className="stepProgress">
@@ -244,15 +396,21 @@ export default function Register() {
                     <circle cx="12" cy="7" r="4"/>
                 </svg>
                 <input
-                    id="username"
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Digite seu nome Completo"
-                    className="loginInput"
-                    autoFocus
-                    required
-                />
+    id="username"
+    type="text"
+    value={username}
+    onChange={(e) => {
+        setUsername(e.target.value);
+        // Limpar erro quando usuário começar a digitar
+        if (fieldErrors.username) {
+            setFieldErrors(prev => ({ ...prev, username: false }));
+        }
+    }}
+    placeholder="Digite seu nome de usuário"
+    className={`loginInput ${fieldErrors.username ? 'error' : ''}`}
+    autoFocus
+    required
+/>
             </div>
         </div>
     )}
@@ -290,15 +448,21 @@ export default function Register() {
                     <polyline points="22,6 12,13 2,6"/>
                 </svg>
                 <input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="seu@email.com"
-                    className="loginInput"
-                    autoFocus
-                    required
-                />
+    id="email"
+    type="email"
+    value={email}
+    onChange={(e) => {
+        setEmail(e.target.value);
+        // Limpar erro quando usuário começar a digitar
+        if (fieldErrors.email) {
+            setFieldErrors(prev => ({ ...prev, email: false }));
+        }
+    }}
+    placeholder="seu@email.com"
+    className={`loginInput ${fieldErrors.email ? 'error' : ''}`}
+    autoFocus
+    required
+/>
             </div>
         </div>
     )}
@@ -482,6 +646,48 @@ export default function Register() {
           </div>
         </div>
       </div>
+      {alert.isOpen && (
+  <div className={`custom-alert ${alert.type}`}>
+    <div className="alert-backdrop" onClick={closeAlert}></div>
+    <div className="alert-content">
+      <div className="alert-header">
+        <div className="alert-icon">
+          {alert.type === 'error' ? (
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="15" y1="9" x2="9" y2="15"/>
+              <line x1="9" y1="9" x2="15" y2="15"/>
+            </svg>
+          ) : (
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+              <polyline points="22,4 12,14.01 9,11.01"/>
+            </svg>
+          )}
+        </div>
+        <button onClick={closeAlert} className="alert-close">
+          <XIcon />
+        </button>
+      </div>
+      
+      <div className="alert-body">
+        <h3 className="alert-title">{alert.title}</h3>
+        <p className="alert-message">{alert.message}</p>
+        {alert.details && (
+          <p className="alert-details">{alert.details}</p>
+        )}
+      </div>
+      
+      {alert.type === 'error' && (
+        <div className="alert-actions">
+          <button onClick={closeAlert} className="alert-button primary">
+            Entendi
+          </button>
+        </div>
+      )}
+    </div>
+  </div>
+)}
     </div>
   );
 }
