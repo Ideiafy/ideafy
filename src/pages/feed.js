@@ -486,7 +486,7 @@ const handlePublishPost = () => {
       <main className="mainContent">
         
         {/* Feed de posts */}
-        <Card showFollowButton={true} additionalPosts={feedPosts}  />
+        <Card />
       </main>
 
     </div>
