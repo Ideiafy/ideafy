@@ -528,3 +528,101 @@
   background: linear-gradient(90deg, rgba(239, 68, 68, 1), rgba(239, 68, 68, 0.6));
   animation: progressBar 3s ease-out forwards;
 }
+/* Container do avatar no feed */
+.feed-avatar-container {
+    position: relative;
+    display: inline-block;
+}
+
+/* NOVO: Placeholder com ícone quando não há foto (versão feed) */
+.feed-avatar-placeholder {
+    width: 40px; /* Tamanho do avatar no feed */
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid rgba(107, 123, 196, 0.3);
+    box-shadow: 0 2px 8px rgba(107, 123, 196, 0.1);
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    display: none; /* Por padrão escondido */
+    align-items: center;
+    justify-content: center;
+    color: rgba(107, 123, 196, 0.6);
+    transition: var(--transition-theme);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.feed-avatar-placeholder:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(107, 123, 196, 0.2);
+    color: rgba(107, 123, 196, 0.8);
+}
+
+.feed-avatar-placeholder.show {
+    display: flex !important;
+}
+
+/* Tema escuro para o placeholder do feed */
+.escuro-fundo-cinza .feed-avatar-placeholder {
+    background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+    border-color: rgba(107, 123, 196, 0.4);
+    color: rgba(107, 123, 196, 0.7);
+}
+
+.escuro-fundo-cinza .feed-avatar-placeholder:hover {
+    color: rgba(107, 123, 196, 0.9);
+}
+
+/* Garantir que o avatar existente mantenha suas propriedades */
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 2px solid rgba(107, 123, 196, 0.2);
+    transition: var(--transition-theme);
+}
+
+.user-avatar:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(107, 123, 196, 0.2);
+}
+
+.escuro-fundo-cinza .user-avatar {
+    border-color: rgba(107, 123, 196, 0.3);
+}
+
+/* Responsividade para mobile */
+@media (max-width: 768px) {
+    .feed-avatar-placeholder {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .feed-avatar-placeholder svg {
+        width: 20px;
+        height: 20px;
+    }
+    
+    .user-avatar {
+        width: 36px;
+        height: 36px;
+    }
+}
+
+@media (max-width: 480px) {
+    .feed-avatar-placeholder {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .feed-avatar-placeholder svg {
+        width: 18px;
+        height: 18px;
+    }
+    
+    .user-avatar {
+        width: 32px;
+        height: 32px;
+    }
+}

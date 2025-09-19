@@ -262,6 +262,13 @@ const userPosts = [
     </svg>
   );
 
+  // ADICIONADO: Ícone de câmera igual ao do conta.js
+  const CameraIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+      <circle cx="12" cy="13" r="4"/>
+    </svg>
+  );
 
 // Modifique a função do botão "Publicar" para:
 const handlePublishPost = () => {
@@ -309,13 +316,28 @@ const handlePublishPost = () => {
 
       <div className="create-post-container">
   <div className="create-post-card">
-    {/* Header do post */}
+    {/* Header do post - MODIFICADO para incluir placeholder */}
     <div className="create-post-header">
-      <img 
-        src={userData.avatar} 
-        alt={userData.name}
-        className="user-avatar"
-      />
+      <div className="feed-avatar-container">
+        {user?.avatar ? (
+          <img 
+            src={user.avatar} 
+            alt={user?.name || "Loading..."} 
+            className="user-avatar"
+            onError={(e) => {
+              // Se a imagem falhar, esconde a img e mostra o ícone
+              e.target.style.display = 'none';
+              e.target.nextElementSibling.style.display = 'flex';
+            }}
+          />
+        ) : null}
+        <div 
+          className={`feed-avatar-placeholder ${!user?.avatar ? 'show' : ''}`}
+          style={{ display: !user?.avatar ? 'flex' : 'none' }}
+        >
+          <CameraIcon />
+        </div>
+      </div>
       <div className="user-info">
         <span className="user-name">{ user?.name || "Loading..."}</span>
         <span className="visibility-text">Público</span>
