@@ -7,6 +7,7 @@ import Card from "./componentes/card";
 import { useNavigate } from "react-router-dom";
 import logged from "./../services/users/logged"
 import findToken from "./../services/auth/token"
+import index from "../services/posts/index";
 
 export default function Feed({ userId = 1 }) {
   const [tema, setTema] = useState("escuro");
@@ -17,28 +18,39 @@ export default function Feed({ userId = 1 }) {
   const [feedPosts, setFeedPosts] = useState([]);
   const [showAlert, setShowAlert] = useState(false);
   const [showTextAlert, setShowTextAlert] = useState(false);
-  const [user,setUser] = useState(null)
+  const [user, setUser] = useState(null)
+   const [Posts, setPosts] = useState([]);
+
   const navigate = useNavigate();
-   
 
-    async function fetchUserData(token)
-    {
-      const response = await logged(token)
-      setUser(response.data)
-    }
-    useEffect(() => {
 
-      const token = findToken();
-      console.log(token)
+  async function fetchUserData(token) {
+    const response = await logged(token)
+    setUser(response.data)
+  }
+
+  async function fetchPostsData(token) {
+    const response = await index(token);
+    return response;
+
+  }
+  useEffect(() => {
+
+    const fetchData = async () => {
+      const token = await findToken();
       if (!token) {
         return navigate("/login");
-      } 
-        fetchUserData(token);
-      
+      }
 
-      //localStorage.clear();
+      await fetchUserData(token);
+      const posts = await fetchPostsData(token);
+      console.log(posts["data:"]);
+      setPosts(posts["data:"]);
+    };
 
-    }, []);
+    fetchData();
+
+  }, []);
 
 
 
@@ -79,108 +91,9 @@ export default function Feed({ userId = 1 }) {
       following: 892
     }
   };
-const userPosts = [
-    {
-      id: 1,
-      author: userData,
-      content: "Acabei de finalizar um projeto incrível usando React e Node.js! A sensação de ver tudo funcionando perfeitamente é indescritível. 🚀",
-      media: [
-        {
-          type: "image",
-          url: Images.DeskCard || "/default-post.jpg",
-          alt: "Projeto finalizado"
-        }
-      ],
-      likes: 45,
-      comments: 12,
-      time: "2h",
-      isLiked: false
-    },
-    {
-      id: 2,
-      author: userData,
-      content: "Compartilhando algumas dicas de UI/UX que aprendi esta semana. O design é muito mais do que apenas fazer algo bonito - é sobre criar experiências memoráveis!",
-      media: [
-        {
-          type: "image",
-          url: Images.Banner2,
-          alt: "UI/UX Design"
-        },
-        {
-          type: "image",
-          url: Images.Banner1,
-          alt: "Design Process"
-        }
-      ],
-      likes: 78,
-      comments: 23,
-      time: "1d",
-      isLiked: true
-    },
-    {
-      id: 3,
-      author: userData,
-      content: "Hoje foi dia de contribuir com open source! Nada melhor do que retribuir para a comunidade que tanto me ensinou.",
-      media: [],
-      likes: 32,
-      comments: 8,
-      time: "3d",
-      isLiked: false
-    }
-  ];
+  
 
-  // Dados mock para os posts do feed geral
-  const posts = [
-    {
-      id: 1,
-      author: {
-        name: "Lucas Alves",
-        avatar: Images.PhotoCard || "/default-avatar.jpg",
-        time: "1h",
-        isOnline: true,
-      },
-      content:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-      media: [
-        {
-          type: "image",
-          url: Images.DeskCard || "/default-post.jpg",
-          alt: "Post image 1",
-        },
-        {
-          type: "image",
-          url: Images.Banner3,
-          alt: "Post image 2",
-        },
-      ],
-      status: "Vendido",
-      likes: 12,
-      comments: 3,
-      isLiked: false,
-    },
-    {
-      id: 2,
-      author: {
-        name: "Samanta Neves",
-        avatar: Images.Banner1,
-        time: "15m",
-        isOnline: false,
-      },
-      content:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-      media: [
-        {
-          type: "image",
-          url: Images.Banner2,
-          alt: "Claude post image",
-        },
-      ],
-      status: "Em Desenvolvimento",
-      likes: 8,
-      comments: 5,
-      isLiked: true,
-    },
-  ];
+  
 
   const HeartIcon = () => (
     <svg
@@ -263,33 +176,44 @@ const userPosts = [
   );
 
 
-// Modifique a função do botão "Publicar" para:
-const handlePublishPost = () => {
-  if (!postText.trim()) {
-    setShowTextAlert(true);
-    return;
-  }
+  // Modifique a função do botão "Publicar" para:
+  const handlePublishPost = () => {
+    if (!postText.trim()) {
+      setShowTextAlert(true);
+      return;
+    }
 
-  // Criar o novo post
-  const newPost = {
-    id: Date.now(),
-    author: userData,
-    content: postText,
-    media: selectedFiles.map(file => ({
-      type: file.type.startsWith('image/') ? 'image' : 'video',
-      url: URL.createObjectURL(file),
-      alt: file.name
-    })),
-    likes: 0,
-    comments: 0,
-    time: 'agora',
-    isLiked: false
+    // Criar o novo post
+    const token = findToken();
+    const formData = new FormData();
+    //console.log( selectedFiles[0]);
+    // formData.append("description", postText);
+    //formData.append("media", selectedFiles[0]);
+
+
+    //store(formData,token)
+
+
+    console.log(postText);
+    const newPost = {
+      id: Date.now(),
+      author: userData,
+      content: postText,
+      media: selectedFiles.map(file => ({
+        type: file.type.startsWith('image/') ? 'image' : 'video',
+        url: URL.createObjectURL(file),
+        alt: file.name
+      })),
+      likes: 0,
+      comments: 0,
+      time: 'agora',
+      isLiked: false
+    };
+
+    setFeedPosts(prev => [newPost, ...prev]);
+    setPostText('');
+    setSelectedFiles([]);
   };
-
-  setFeedPosts(prev => [newPost, ...prev]);
-  setPostText('');
-  setSelectedFiles([]);
-};
 
   return (
     <div
@@ -308,185 +232,186 @@ const handlePublishPost = () => {
       />
 
       <div className="create-post-container">
-  <div className="create-post-card">
-    {/* Header do post */}
-    <div className="create-post-header">
-      <img 
-        src={userData.avatar} 
-        alt={userData.name}
-        className="user-avatar"
-      />
-      <div className="user-info">
-        <span className="user-name">{ user?.name || "Loading..."}</span>
-        <span className="visibility-text">Público</span>
-      </div>
-    </div>
+        <div className="create-post-card">
+          {/* Header do post */}
+          <div className="create-post-header">
+            <img
+              src={userData.avatar}
+              alt={userData.name}
+              className="user-avatar"
+            />
+            <div className="user-info">
+              <span className="user-name">{user?.name || "Loading..."}</span>
+              <span className="visibility-text">Público</span>
+            </div>
+          </div>
 
-    {/* Área de texto */}
-    <div className="create-post-content">
-      <textarea
-        ref={textareaRef}
-        value={postText}
-        onChange={(e) => setPostText(e.target.value)}
-        placeholder="No que você está pensando?"
-        className="post-textarea"
-        rows="1"
-      />
-    </div>
+          {/* Área de texto */}
+          <div className="create-post-content">
+            <textarea
+              ref={textareaRef}
+              value={postText}
+              onChange={(e) => setPostText(e.target.value)}
+              placeholder="No que você está pensando?"
+              className="post-textarea"
+              rows="1"
+            />
+          </div>
 
-    {/* Preview de arquivos selecionados */}
-    {selectedFiles.length > 0 && (
-  <div className="media-preview">
-    {selectedFiles.map((file, index) => (
-      <div key={index} className="media-preview-item">
-        {file.type.startsWith('image/') ? (
-          <img 
-            src={URL.createObjectURL(file)} 
-            alt={`Preview ${index + 1}`}
-            className="preview-image"
-          />
-        ) : (
-          <video 
-            src={URL.createObjectURL(file)} 
-            className="preview-image"
-            controls
-            muted
-          />
+          {/* Preview de arquivos selecionados */}
+          {selectedFiles.length > 0 && (
+            <div className="media-preview">
+              {selectedFiles.map((file, index) => (
+                <div key={index} className="media-preview-item">
+                  {file.type.startsWith('image/') ? (
+                    <img
+                      src={URL.createObjectURL(file)}
+                      alt={`Preview ${index + 1}`}
+                      className="preview-image"
+                    />
+                  ) : (
+                    <video
+                      src={URL.createObjectURL(file)}
+                      className="preview-image"
+                      controls
+                      muted
+                    />
+                  )}
+                  <button
+                    onClick={() => {
+                      const newFiles = selectedFiles.filter((_, i) => i !== index);
+                      setSelectedFiles(newFiles);
+                    }}
+                    className="remove-media-btn"
+                  >
+                    <CloseIcon />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Barra de ações */}
+          <div className="create-post-actions">
+            <div className="media-options">
+              <label className="media-option">
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={(e) => {
+                    const files = Array.from(e.target.files);
+
+                    if (selectedFiles.length > 0 || files.length > 1) {
+                      setShowAlert(true);
+                      e.target.value = '';
+                      return;
+                    }
+
+                    setSelectedFiles(files); // Remove o prev => [...prev, ...files]
+                  }}
+                  style={{ display: 'none' }}
+                />
+                <PhotoIcon />
+                <span>Foto</span>
+              </label>
+
+              <label className="media-option">
+                <input
+                  type="file"
+                  multiple
+                  accept="video/mp4,video/webm,video/ogg,video/quicktime,video/x-msvideo"
+                  onChange={(e) => {
+                    const files = Array.from(e.target.files);
+
+                    if (selectedFiles.length > 0 || files.length > 1) {
+                      setShowAlert(true);
+                      e.target.value = '';
+                      return;
+                    }
+
+                    const supportedFiles = files.filter(file =>
+                      file.type.startsWith('video/') &&
+                      ['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime', 'video/x-msvideo'].includes(file.type)
+                    );
+
+                    if (supportedFiles.length !== files.length) {
+                      alert('Alguns arquivos não são suportados. Use MP4, WebM ou OGG.');
+                    }
+
+                    setSelectedFiles(supportedFiles);
+                  }}
+                  style={{ display: 'none' }}
+                />
+                <VideoIcon />
+                <span>Vídeo</span>
+              </label>
+            </div>
+
+            <button
+              className={`post-button ${postText.trim() || selectedFiles.length > 0 ? 'active' : 'disabled'}`}
+              onClick={handlePublishPost}
+            >
+              Publicar
+            </button>
+          </div>
+        </div>
+        {/* Alerta de limite de mídia */}
+        {showAlert && (
+          <div className="modern-alert-overlay" onClick={() => setShowAlert(false)}>
+            <div className="modern-alert-container" onClick={(e) => e.stopPropagation()}>
+              <div className="modern-alert-content">
+                <div className="alert-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="10" fill="rgba(107, 123, 196, 0.1)" stroke="rgba(107, 123, 196, 1)" strokeWidth="2" />
+                    <line x1="12" y1="16" x2="12" y2="12" stroke="rgba(107, 123, 196, 1)" strokeWidth="2" strokeLinecap="round" />
+                    <circle cx="12" cy="8" r="1" fill="rgba(107, 123, 196, 1)" />
+                  </svg>
+                </div>
+                <div className="alert-text">
+                  <h3>Limite de mídia atingido</h3>
+                  <p>Por enquanto, você pode adicionar apenas 1 arquivo de mídia por post. Estamos trabalhando para melhorar essa funcionalidade!</p>
+                </div>
+                <button className="alert-close-btn" onClick={() => setShowAlert(false)}>
+                  <CloseIcon />
+                </button>
+              </div>
+              <div className="alert-progress-bar"></div>
+            </div>
+          </div>
         )}
-        <button
-          onClick={() => {
-            const newFiles = selectedFiles.filter((_, i) => i !== index);
-            setSelectedFiles(newFiles);
-          }}
-          className="remove-media-btn"
-        >
-          <CloseIcon />
-        </button>
+        {/* Alerta de texto obrigatório */}
+        {showTextAlert && (
+          <div className="modern-alert-overlay" onClick={() => setShowTextAlert(false)}>
+            <div className="modern-alert-container" onClick={(e) => e.stopPropagation()}>
+              <div className="modern-alert-content">
+                <div className="alert-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="10" fill="rgba(239, 68, 68, 0.1)" stroke="rgba(239, 68, 68, 1)" strokeWidth="2" />
+                    <line x1="12" y1="16" x2="12" y2="12" stroke="rgba(239, 68, 68, 1)" strokeWidth="2" strokeLinecap="round" />
+                    <circle cx="12" cy="8" r="1" fill="rgba(239, 68, 68, 1)" />
+                  </svg>
+                </div>
+                <div className="alert-text">
+                  <h3>Texto obrigatório</h3>
+                  <p>Você precisa escrever algo no seu post! Conte-nos o que você está pensando.</p>
+                </div>
+                <button className="alert-close-btn" onClick={() => setShowTextAlert(false)}>
+                  <CloseIcon />
+                </button>
+              </div>
+              <div className="alert-progress-bar-red"></div>
+            </div>
+          </div>
+        )}
       </div>
-    ))}
-  </div>
-)}
-
-    {/* Barra de ações */}
-    <div className="create-post-actions">
-      <div className="media-options">
-        <label className="media-option">
-          <input
-            type="file"
-            multiple
-            accept="image/*"
-            onChange={(e) => {
-  const files = Array.from(e.target.files);
-  
-  if (selectedFiles.length > 0 || files.length > 1) {
-    setShowAlert(true);
-    e.target.value = '';
-    return;
-  }
-  
-  setSelectedFiles(files); // Remove o prev => [...prev, ...files]
-}}
-            style={{ display: 'none' }}
-          />
-          <PhotoIcon />
-          <span>Foto</span>
-        </label>
-
-        <label className="media-option">
-  <input
-    type="file"
-    multiple
-    accept="video/mp4,video/webm,video/ogg,video/quicktime,video/x-msvideo"
-    onChange={(e) => {
-  const files = Array.from(e.target.files);
-  
-  if (selectedFiles.length > 0 || files.length > 1) {
-    setShowAlert(true);
-    e.target.value = '';
-    return;
-  }
-  
-  const supportedFiles = files.filter(file => 
-    file.type.startsWith('video/') && 
-    ['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime', 'video/x-msvideo'].includes(file.type)
-  );
-  
-  if (supportedFiles.length !== files.length) {
-    alert('Alguns arquivos não são suportados. Use MP4, WebM ou OGG.');
-  }
-  
-  setSelectedFiles(supportedFiles); 
-}}
-    style={{ display: 'none' }}
-  />
-  <VideoIcon />
-  <span>Vídeo</span>
-</label>
-      </div>
-
-      <button 
-        className={`post-button ${postText.trim() || selectedFiles.length > 0 ? 'active' : 'disabled'}`}
-        onClick={handlePublishPost}
-      >
-        Publicar
-      </button>
-    </div>
-  </div>
-  {/* Alerta de limite de mídia */}
-{showAlert && (
-  <div className="modern-alert-overlay" onClick={() => setShowAlert(false)}>
-    <div className="modern-alert-container" onClick={(e) => e.stopPropagation()}>
-      <div className="modern-alert-content">
-        <div className="alert-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-            <circle cx="12" cy="12" r="10" fill="rgba(107, 123, 196, 0.1)" stroke="rgba(107, 123, 196, 1)" strokeWidth="2"/>
-            <line x1="12" y1="16" x2="12" y2="12" stroke="rgba(107, 123, 196, 1)" strokeWidth="2" strokeLinecap="round"/>
-            <circle cx="12" cy="8" r="1" fill="rgba(107, 123, 196, 1)"/>
-          </svg>
-        </div>
-        <div className="alert-text">
-          <h3>Limite de mídia atingido</h3>
-          <p>Por enquanto, você pode adicionar apenas 1 arquivo de mídia por post. Estamos trabalhando para melhorar essa funcionalidade!</p>
-        </div>
-        <button className="alert-close-btn" onClick={() => setShowAlert(false)}>
-          <CloseIcon />
-        </button>
-      </div>
-      <div className="alert-progress-bar"></div>
-    </div>
-  </div>
-)}
-{/* Alerta de texto obrigatório */}
-{showTextAlert && (
-  <div className="modern-alert-overlay" onClick={() => setShowTextAlert(false)}>
-    <div className="modern-alert-container" onClick={(e) => e.stopPropagation()}>
-      <div className="modern-alert-content">
-        <div className="alert-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-            <circle cx="12" cy="12" r="10" fill="rgba(239, 68, 68, 0.1)" stroke="rgba(239, 68, 68, 1)" strokeWidth="2"/>
-            <line x1="12" y1="16" x2="12" y2="12" stroke="rgba(239, 68, 68, 1)" strokeWidth="2" strokeLinecap="round"/>
-            <circle cx="12" cy="8" r="1" fill="rgba(239, 68, 68, 1)"/>
-          </svg>
-        </div>
-        <div className="alert-text">
-          <h3>Texto obrigatório</h3>
-          <p>Você precisa escrever algo no seu post! Conte-nos o que você está pensando.</p>
-        </div>
-        <button className="alert-close-btn" onClick={() => setShowTextAlert(false)}>
-          <CloseIcon />
-        </button>
-      </div>
-      <div className="alert-progress-bar-red"></div>
-    </div>
-  </div>
-)}
-</div>
 
       {/* Conteúdo Principal */}
       <main className="mainContent">
-        
+
         {/* Feed de posts */}
-        <Card />
+       
+        <Card additionalPosts={Posts} />
       </main>
 
     </div>
