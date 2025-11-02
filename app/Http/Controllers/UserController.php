@@ -75,4 +75,21 @@ class UserController extends Controller
     }
 
 
+    public function getPosts()
+    {
+        $user = auth()->user();
+        $posts = $user->posts()
+                  ->with('user')  
+                  ->orderBy('created_at', 'desc')
+                  ->get();
+
+        return response()->json([
+            'data' => $posts
+        ]);
+
+        
+    }
+
+
+
 }

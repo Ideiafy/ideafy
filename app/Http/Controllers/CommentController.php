@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\CommentModel;
+use App\Http\Requests\CommentRequest;
 
 class CommentController extends Controller
 {
@@ -16,7 +17,7 @@ class CommentController extends Controller
        ],200);
     }
 
-    public function store(int $idPost,Request $request)
+    public function store(int $idPost, CommentRequest $request)
     {
         $idUser = auth()->id();
       
@@ -29,13 +30,18 @@ class CommentController extends Controller
         return response()->json('comment registered succesfully');
     }
 
-    public function destroy()
+    public function destroy(int $id)
     {
+        $comment = CommentModel::find($id);
+        
+        if($comment)
+        {
+            $comment->delete();
+            return response()->json("comment deleted");
+        }
 
+        return response()->json("comment not found");
     }
 
-    public function show()
-    {
-
-    }
+   
 }

@@ -17,6 +17,6 @@ class UserModel  extends Authenticatable
 
     public function posts()
     {
-        return $this->hasMany(PostModel::class);
+        return $this->hasMany(PostModel::class,'id_user');
     }
 }

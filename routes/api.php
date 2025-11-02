@@ -15,6 +15,10 @@ Route::get('/user', function (Request $request) {
 
 //User
 Route::post('/users/store', [UserController::class,'store']);
+
+Route::middleware('auth:sanctum')->get('/logged', function (Request $request) {
+    return response()->json($request->user());
+});
 Route::middleware('auth:sanctum')->group(function(){
     
     //users
@@ -22,15 +26,19 @@ Route::middleware('auth:sanctum')->group(function(){
     Route::get('/users/{username}', [UserController::class,'show']);
     Route::put('/users/{id}/update', [UserController::class,'update']);
     Route::delete('/users/{id}/destroy', [UserController::class,'destroy']);
+    Route::get('/user/posts',[UserController::class,'getPosts']);
+
 
     //posts
     Route::post('/posts',[PostController::class,'store']);
     Route::get('/posts',[PostController::class,'index']);
     Route::get('/posts/{id}',[PostController::class,'show']);
+    Route::delete('/posts/{id}',[PostController::class,'destroy']);
 
     //Comments
     Route::post('/comments/{id}', [CommentController::class,'store']);
     Route::get('/comments', [CommentController::class,'index']);
+    Route::delete('/comments/{id}', [CommentController::class,'destroy']);
 });
 
 //Auth

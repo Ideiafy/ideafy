@@ -19,26 +19,27 @@ class PostController extends Controller
 
     public function store(PostRequest $request)
     {
-       $id = auth()->id();
-    
+       $id = auth()->id();  
+        
         $mediaPath = null;
         $mediaType = null;
+    
 
         if($request->hasFile('media_'))
         {
-            $mediaPath = $request->file('media_')->store('uploads','public');
+            $path = $request->file('media_')->store('uploads','public');
+            $mediaPath = asset('storage/' . $path);
             $mimeType = $request->file('media_')->getClientMimeType();
             $extension = explode('/', $mimeType)[1];
             $mediaType = in_array($extension, ['jpeg', 'jpg', 'png']) ? 'image' : 'video';
         }
 
-     
-        //dd($mediaType);
+
 
         PostModel::create([
-            'title' => $request->title,
+            'title' => "media",
             'description' => $request->description,
-            'status' => $request->status,
+            'status' => "em andamento",
             'media_path' => $mediaPath,
             'media_type' => $mediaType,
             'id_user' => $id
@@ -54,9 +55,16 @@ class PostController extends Controller
 
     }
 
-    public function destroy()
+    public function destroy(int $id)
     {
+        $post = PostModel::find($id);
 
+        if($post)
+        {
+            $post->delete();
+             return response()->json("post deleted");
+        }
+        return response()->json("post not found");
     }
 
     public function show($id)
@@ -67,4 +75,5 @@ class PostController extends Controller
         'data:' => $posts
        ],200);
     }
+
 }
