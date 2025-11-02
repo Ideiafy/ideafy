@@ -6,8 +6,9 @@ import MobileHeader from "./componentes/mobileHeader";
 import Card from "./componentes/card";
 import { useNavigate } from "react-router-dom";
 import logged from "./../services/users/logged"
-import findToken from "./../services/auth/token"
 import index from "../services/posts/index";
+import getToken from "./../services/auth/token";
+import store from "../services/posts/store";
 
 export default function Feed({ userId = 1 }) {
   const [tema, setTema] = useState("escuro");
@@ -19,7 +20,7 @@ export default function Feed({ userId = 1 }) {
   const [showAlert, setShowAlert] = useState(false);
   const [showTextAlert, setShowTextAlert] = useState(false);
   const [user, setUser] = useState(null)
-   const [Posts, setPosts] = useState([]);
+  const [Posts, setPosts] = useState([]);
 
   const navigate = useNavigate();
 
@@ -37,7 +38,8 @@ export default function Feed({ userId = 1 }) {
   useEffect(() => {
 
     const fetchData = async () => {
-      const token = await findToken();
+      const token = await getToken();
+      console.log(token)
       if (!token) {
         return navigate("/login");
       }
@@ -60,7 +62,6 @@ export default function Feed({ userId = 1 }) {
 
   const handleNavigation = (item) => {
     setActiveNavItem(item);
-    // Adicione sua lógica de navegação aqui
   };
 
 
@@ -72,28 +73,6 @@ export default function Feed({ userId = 1 }) {
         textareaRef.current.scrollHeight + "px";
     }
   }, [postText]);
-
-
-  // Mock data do usuário
-  const userData = {
-    id: userId,
-    name: "Lucas Alves",
-    username: "@lucasalves",
-    bio: "Desenvolvedor Full Stack apaixonado por tecnologia e inovação. Criando soluções que fazem a diferença no mundo digital.",
-    avatar: Images.PhotoCard || "/default-avatar.jpg",
-    coverImage: Images.Banner3 || "/default-cover.jpg",
-    joinDate: "Março 2022",
-    isOnline: true,
-    verified: true,
-    stats: {
-      posts: 124,
-      followers: 2847,
-      following: 892
-    }
-  };
-  
-
-  
 
   const HeartIcon = () => (
     <svg
@@ -175,44 +154,22 @@ export default function Feed({ userId = 1 }) {
     </svg>
   );
 
-
-  // Modifique a função do botão "Publicar" para:
-  const handlePublishPost = () => {
+  async function handlePublishPost() {
     if (!postText.trim()) {
       setShowTextAlert(true);
       return;
     }
 
+
     // Criar o novo post
-    const token = findToken();
+    const token = await getToken();
     const formData = new FormData();
-    //console.log( selectedFiles[0]);
-    // formData.append("description", postText);
-    //formData.append("media", selectedFiles[0]);
+    formData.append("description", postText);
+    formData.append("media_", selectedFiles[0]);
 
 
-    //store(formData,token)
+   const response =  await store(formData,token)
 
-
-    console.log(postText);
-    const newPost = {
-      id: Date.now(),
-      author: userData,
-      content: postText,
-      media: selectedFiles.map(file => ({
-        type: file.type.startsWith('image/') ? 'image' : 'video',
-        url: URL.createObjectURL(file),
-        alt: file.name
-      })),
-      likes: 0,
-      comments: 0,
-      time: 'agora',
-      isLiked: false
-    };
-
-    setFeedPosts(prev => [newPost, ...prev]);
-    setPostText('');
-    setSelectedFiles([]);
   };
 
   return (
@@ -236,8 +193,7 @@ export default function Feed({ userId = 1 }) {
           {/* Header do post */}
           <div className="create-post-header">
             <img
-              src={userData.avatar}
-              alt={userData.name}
+             
               className="user-avatar"
             />
             <div className="user-info">
@@ -410,7 +366,7 @@ export default function Feed({ userId = 1 }) {
       <main className="mainContent">
 
         {/* Feed de posts */}
-       
+
         <Card additionalPosts={Posts} />
       </main>
 

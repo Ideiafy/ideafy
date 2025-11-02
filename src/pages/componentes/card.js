@@ -56,7 +56,7 @@ export default function Card({ additionalPosts = [] }) {
 
           {post.media_path && (
             post.media_type === "image" ? (
-              <img src={Images.Banner3} alt={post.title} className="postImage" />
+              <img src={post.media_path} alt={post.title} className="postImage" />
             ) : (
                <img src="./../../assets/images/banner1.jpg" alt={post.title} className="postImage" />
               //<video src={post.media_path} className="userProfile-postVideo" controls />

@@ -29,7 +29,10 @@ export default function Login() {
       localStorage.setItem("token", token);
       navigate('/feed');
     }
-    navigate('/feed');
+    else{
+       navigate('/login');
+    }
+   
    
   };
 

@@ -1,21 +1,19 @@
 .userProfile-postImageContainer {
   display: flex;
-  flex-direction: column;
-  gap: 20px;
-  max-width: 750px;
-  margin: 0 auto;
-  height: 1000px;
+  flex-direction: column; /* cards em coluna */
+  gap: 30px; /* espaçamento entre cards */
+  align-items: center; /* centraliza os cards */
+  padding: 20px;
 }
-
-
 
 .userProfile-postCard {
   background: #1a1a1a;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-left: 4px solid rgba(107, 123, 196, 1);
   overflow: hidden;
-  outline: none;
-  border-left: 4px solid rgba(107, 123, 196, 1); /* Barra azul na esquerda */
+  width: 800px; 
+  height: 500px; 
 }
 
 
